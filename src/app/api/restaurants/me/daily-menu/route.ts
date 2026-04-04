@@ -1,0 +1,111 @@
+import { NextRequest, NextResponse } from "next/server";
+import { db } from "@/db";
+import { dailyMenus, dailyMenuItems } from "@/db/schema";
+import { getSession } from "@/lib/auth";
+import { eq, and, gte, lte } from "drizzle-orm";
+
+export async function GET() {
+  const session = await getSession();
+  if (!session?.restaurantId) {
+    return NextResponse.json({ error: "Nepřihlášen" }, { status: 401 });
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+
+  const [menu] = await db
+    .select()
+    .from(dailyMenus)
+    .where(
+      and(
+        eq(dailyMenus.restaurantId, session.restaurantId),
+        gte(dailyMenus.date, today),
+        lte(dailyMenus.date, tomorrow)
+      )
+    )
+    .limit(1);
+
+  if (!menu) {
+    return NextResponse.json({ dailyMenu: null, items: [] });
+  }
+
+  const items = await db
+    .select()
+    .from(dailyMenuItems)
+    .where(eq(dailyMenuItems.dailyMenuId, menu.id))
+    .orderBy(dailyMenuItems.sortOrder);
+
+  return NextResponse.json({ dailyMenu: menu, items });
+}
+
+export async function POST(request: NextRequest) {
+  const session = await getSession();
+  if (!session?.restaurantId) {
+    return NextResponse.json({ error: "Nepřihlášen" }, { status: 401 });
+  }
+
+  try {
+    const { action, ...data } = await request.json();
+
+    if (action === "createMenu") {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      // Delete existing today's menu
+      const existing = await db
+        .select()
+        .from(dailyMenus)
+        .where(
+          and(
+            eq(dailyMenus.restaurantId, session.restaurantId),
+            gte(dailyMenus.date, today),
+            lte(dailyMenus.date, tomorrow)
+          )
+        );
+
+      for (const m of existing) {
+        await db.delete(dailyMenuItems).where(eq(dailyMenuItems.dailyMenuId, m.id));
+        await db.delete(dailyMenus).where(eq(dailyMenus.id, m.id));
+      }
+
+      const [menu] = await db
+        .insert(dailyMenus)
+        .values({
+          restaurantId: session.restaurantId,
+          date: today,
+        })
+        .returning();
+
+      return NextResponse.json({ dailyMenu: menu });
+    }
+
+    if (action === "addItem") {
+      const [item] = await db
+        .insert(dailyMenuItems)
+        .values({
+          dailyMenuId: data.dailyMenuId,
+          name: data.name,
+          description: data.description || null,
+          price: data.price,
+          type: data.type || "main",
+          sortOrder: data.sortOrder || 0,
+        })
+        .returning();
+      return NextResponse.json({ item });
+    }
+
+    if (action === "deleteItem") {
+      await db.delete(dailyMenuItems).where(eq(dailyMenuItems.id, data.id));
+      return NextResponse.json({ success: true });
+    }
+
+    return NextResponse.json({ error: "Neznámá akce" }, { status: 400 });
+  } catch (error) {
+    console.error("Daily menu error:", error);
+    return NextResponse.json({ error: "Chyba" }, { status: 500 });
+  }
+}
