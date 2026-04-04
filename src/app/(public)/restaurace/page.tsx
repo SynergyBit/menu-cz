@@ -14,6 +14,9 @@ import {
   UtensilsCrossed,
   Star,
   Crown,
+  Clock,
+  CalendarDays,
+  FileText,
 } from "lucide-react";
 
 interface Restaurant {
@@ -28,6 +31,9 @@ interface Restaurant {
   logoUrl: string | null;
   coverUrl: string | null;
   isPremium: boolean;
+  menuItemCount: number;
+  hasDailyMenu: boolean;
+  isOpenNow: boolean;
 }
 
 const priceLabels: Record<number, string> = {
@@ -165,14 +171,27 @@ function RestauraceContent() {
                       <UtensilsCrossed className="h-12 w-12 text-primary/30" />
                     </div>
                   )}
-                  {r.isPremium && (
-                    <Badge className="absolute right-2 top-2 gap-1 bg-yellow-500/90 text-yellow-950 hover:bg-yellow-500">
-                      <Crown className="h-3 w-3" />
-                      Premium
-                    </Badge>
+                  <div className="absolute right-2 top-2 flex flex-col items-end gap-1.5">
+                    {r.isPremium && (
+                      <Badge className="gap-1 bg-yellow-500/90 text-yellow-950 hover:bg-yellow-500">
+                        <Crown className="h-3 w-3" />
+                        Premium
+                      </Badge>
+                    )}
+                    {r.isOpenNow && (
+                      <Badge className="gap-1 bg-green-500/90 text-white hover:bg-green-500">
+                        <Clock className="h-3 w-3" />
+                        Otevřeno
+                      </Badge>
+                    )}
+                  </div>
+                  {r.logoUrl && (
+                    <div className="absolute -bottom-5 left-4 h-12 w-12 overflow-hidden rounded-xl border-2 border-card bg-card shadow-md">
+                      <img src={r.logoUrl} alt="" className="h-full w-full object-contain p-1" />
+                    </div>
                   )}
                 </div>
-                <CardContent className="pt-4">
+                <CardContent className={r.logoUrl ? "pt-8" : "pt-4"}>
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="font-semibold group-hover:text-primary transition-colors">
                       {r.name}
@@ -198,6 +217,18 @@ function RestauraceContent() {
                     {r.cuisineType && (
                       <Badge variant="outline" className="text-xs">
                         {r.cuisineType}
+                      </Badge>
+                    )}
+                    {r.hasDailyMenu && (
+                      <Badge variant="outline" className="gap-1 text-xs border-green-500/30 text-green-700 dark:text-green-400">
+                        <CalendarDays className="h-3 w-3" />
+                        Denní menu
+                      </Badge>
+                    )}
+                    {r.menuItemCount > 0 && (
+                      <Badge variant="outline" className="gap-1 text-xs">
+                        <FileText className="h-3 w-3" />
+                        {r.menuItemCount} položek
                       </Badge>
                     )}
                   </div>

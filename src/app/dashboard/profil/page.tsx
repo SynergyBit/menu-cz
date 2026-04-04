@@ -14,6 +14,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import { ImageUpload } from "@/components/image-upload";
 import { Save, Loader2, Check } from "lucide-react";
 
 const cuisineOptions = [
@@ -82,6 +84,37 @@ export default function ProfilPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <h1 className="text-2xl font-bold">Profil restaurace</h1>
+
+      {/* Fotky */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Fotky</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-6 sm:grid-cols-[auto_1fr]">
+            <div className="space-y-2">
+              <Label>Logo</Label>
+              <ImageUpload
+                type="logo"
+                currentUrl={(restaurant.logoUrl as string) || null}
+                onUploaded={(url) =>
+                  setRestaurant((r) => ({ ...r, logoUrl: url }))
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Úvodní fotka</Label>
+              <ImageUpload
+                type="cover"
+                currentUrl={(restaurant.coverUrl as string) || null}
+                onUploaded={(url) =>
+                  setRestaurant((r) => ({ ...r, coverUrl: url }))
+                }
+              />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <form onSubmit={handleSave}>
         <Card>

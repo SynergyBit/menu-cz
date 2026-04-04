@@ -182,8 +182,55 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA for restaurants */}
+      {/* How it works */}
       <section className="py-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="mb-12 text-center">
+            <h2 className="text-2xl font-bold sm:text-3xl">
+              Jak to funguje?
+            </h2>
+            <p className="mt-3 text-muted-foreground">
+              3 jednoduché kroky pro restaurace
+            </p>
+          </div>
+
+          <div className="grid gap-8 sm:grid-cols-3">
+            {[
+              {
+                step: "1",
+                title: "Zaregistrujte se",
+                description:
+                  "Vytvořte si účet a profil vaší restaurace. Je to zdarma a zabere to 2 minuty.",
+              },
+              {
+                step: "2",
+                title: "Přidejte menu",
+                description:
+                  "Nahrajte jídelní lístek, nastavte denní menu a otevírací dobu. Vše přes jednoduchý dashboard.",
+              },
+              {
+                step: "3",
+                title: "Sdílejte QR kód",
+                description:
+                  "Vytiskněte QR kód a umístěte ho na stoly. Zákazníci naskenují a uvidí vaše menu v mobilu.",
+              },
+            ].map((item) => (
+              <div key={item.step} className="relative text-center">
+                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-xl font-bold text-primary-foreground">
+                  {item.step}
+                </div>
+                <h3 className="mb-2 text-lg font-semibold">{item.title}</h3>
+                <p className="text-sm text-muted-foreground">
+                  {item.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA for restaurants */}
+      <section className="border-t py-20">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <Card className="overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-card to-warm/5">
             <CardContent className="flex flex-col items-center gap-6 py-12 text-center sm:py-16">

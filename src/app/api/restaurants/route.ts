@@ -1,18 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { restaurants, openingHours } from "@/db/schema";
-import { eq, and, ilike, or, sql } from "drizzle-orm";
+import { restaurants, menuItems, openingHours, dailyMenus, dailyMenuItems } from "@/db/schema";
+import { eq, and, ilike, or, sql, count, gte, lte } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const q = searchParams.get("q");
     const cuisine = searchParams.get("cuisine");
-
-    let query = db
-      .select()
-      .from(restaurants)
-      .where(eq(restaurants.isActive, true));
 
     const conditions = [eq(restaurants.isActive, true)];
 
@@ -36,7 +31,58 @@ export async function GET(request: NextRequest) {
       .where(and(...conditions))
       .orderBy(sql`${restaurants.isPremium} DESC, ${restaurants.name} ASC`);
 
-    return NextResponse.json({ restaurants: result });
+    // Enrich with menu item counts and opening hours
+    const enriched = await Promise.all(
+      result.map(async (r) => {
+        const [itemCount] = await db
+          .select({ count: count() })
+          .from(menuItems)
+          .where(eq(menuItems.restaurantId, r.id));
+
+        const hours = await db
+          .select()
+          .from(openingHours)
+          .where(eq(openingHours.restaurantId, r.id))
+          .orderBy(openingHours.dayOfWeek);
+
+        // Check if has today's daily menu
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const [todayMenu] = await db
+          .select({ id: dailyMenus.id })
+          .from(dailyMenus)
+          .where(
+            and(
+              eq(dailyMenus.restaurantId, r.id),
+              gte(dailyMenus.date, today),
+              lte(dailyMenus.date, tomorrow)
+            )
+          )
+          .limit(1);
+
+        // Check if open now
+        const now = new Date();
+        const dayOfWeek = (now.getDay() + 6) % 7; // Convert Sunday=0 to Monday=0
+        const todayHours = hours.find((h) => h.dayOfWeek === dayOfWeek);
+        let isOpenNow = false;
+        if (todayHours && !todayHours.isClosed && todayHours.openTime && todayHours.closeTime) {
+          const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+          isOpenNow = currentTime >= todayHours.openTime && currentTime <= todayHours.closeTime;
+        }
+
+        return {
+          ...r,
+          menuItemCount: itemCount?.count || 0,
+          hasDailyMenu: !!todayMenu,
+          isOpenNow,
+        };
+      })
+    );
+
+    return NextResponse.json({ restaurants: enriched });
   } catch (error) {
     console.error("Restaurants API error:", error);
     return NextResponse.json(
