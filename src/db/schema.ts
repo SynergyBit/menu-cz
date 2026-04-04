@@ -1,4 +1,4 @@
-import { pgTable, text, timestamp, integer, boolean, uuid, time, numeric, serial } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, integer, boolean, uuid, time, numeric, serial, doublePrecision } from "drizzle-orm/pg-core";
 
 export const users = pgTable("users", {
   id: uuid("id").defaultRandom().primaryKey(),
@@ -24,6 +24,8 @@ export const restaurants = pgTable("restaurants", {
   coverUrl: text("cover_url"),
   cuisineType: text("cuisine_type"), // česká, italská, asijská...
   priceRange: integer("price_range").default(2), // 1-4
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
   isActive: boolean("is_active").default(false).notNull(),
   isPremium: boolean("is_premium").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),

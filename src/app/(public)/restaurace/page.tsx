@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, lazy } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,15 @@ import {
   Clock,
   CalendarDays,
   FileText,
+  List,
+  Map,
 } from "lucide-react";
+
+const RestaurantMap = lazy(() =>
+  import("@/components/restaurant-map").then((m) => ({
+    default: m.RestaurantMap,
+  }))
+);
 
 interface Restaurant {
   id: string;
@@ -34,6 +42,8 @@ interface Restaurant {
   menuItemCount: number;
   hasDailyMenu: boolean;
   isOpenNow: boolean;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 const priceLabels: Record<number, string> = {
@@ -76,6 +86,7 @@ function RestauraceContent() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState(searchParams.get("q") || "");
+  const [view, setView] = useState<"list" | "map">("list");
 
   useEffect(() => {
     const q = searchParams.get("q") || "";
@@ -115,20 +126,66 @@ function RestauraceContent() {
         </p>
       </div>
 
-      <form onSubmit={handleSearch} className="mb-8 flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Hledat restauraci..."
-            className="h-11 pl-10"
-          />
+      <div className="mb-8 flex gap-2">
+        <form onSubmit={handleSearch} className="flex flex-1 gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Hledat restauraci..."
+              className="h-11 pl-10"
+            />
+          </div>
+          <Button type="submit" className="h-11">
+            Hledat
+          </Button>
+        </form>
+        <div className="flex rounded-lg border">
+          <Button
+            variant={view === "list" ? "secondary" : "ghost"}
+            size="icon"
+            className="h-11 w-11 rounded-r-none"
+            onClick={() => setView("list")}
+          >
+            <List className="h-4 w-4" />
+          </Button>
+          <Button
+            variant={view === "map" ? "secondary" : "ghost"}
+            size="icon"
+            className="h-11 w-11 rounded-l-none"
+            onClick={() => setView("map")}
+          >
+            <Map className="h-4 w-4" />
+          </Button>
         </div>
-        <Button type="submit" className="h-11">
-          Hledat
-        </Button>
-      </form>
+      </div>
+
+      {/* Map view */}
+      {view === "map" && !loading && restaurants.length > 0 && (
+        <div className="mb-6">
+          <Suspense fallback={<Skeleton className="h-[450px] w-full rounded-xl" />}>
+            <RestaurantMap
+              className="h-[450px] w-full rounded-xl border"
+              markers={restaurants
+                .filter((r) => r.latitude && r.longitude)
+                .map((r) => ({
+                  lat: r.latitude!,
+                  lng: r.longitude!,
+                  name: r.name,
+                  slug: r.slug,
+                  cuisineType: r.cuisineType,
+                  isOpenNow: r.isOpenNow,
+                }))}
+            />
+          </Suspense>
+          {restaurants.filter((r) => !r.latitude || !r.longitude).length > 0 && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {restaurants.filter((r) => !r.latitude || !r.longitude).length} restaurací bez zadané adresy se nezobrazuje na mapě
+            </p>
+          )}
+        </div>
+      )}
 
       {loading ? (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

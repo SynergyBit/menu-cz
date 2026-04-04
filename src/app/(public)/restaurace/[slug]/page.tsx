@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, use, lazy, Suspense } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+
+const RestaurantMap = lazy(() =>
+  import("@/components/restaurant-map").then((m) => ({
+    default: m.RestaurantMap,
+  }))
+);
 import {
   MapPin,
   Phone,
@@ -37,6 +43,8 @@ interface Restaurant {
   coverUrl: string | null;
   logoUrl: string | null;
   isPremium: boolean;
+  latitude: number | null;
+  longitude: number | null;
 }
 
 interface MenuItem {
@@ -201,6 +209,27 @@ export default function RestaurantDetailPage({
           )}
         </div>
       </div>
+
+      {/* Map */}
+      {r.latitude && r.longitude && (
+        <div className="mb-8">
+          <Suspense fallback={<Skeleton className="h-[250px] w-full rounded-xl" />}>
+            <RestaurantMap
+              className="h-[250px] w-full rounded-xl border"
+              markers={[
+                {
+                  lat: r.latitude,
+                  lng: r.longitude,
+                  name: r.name,
+                  slug: r.slug,
+                },
+              ]}
+              singleMarker
+              zoom={15}
+            />
+          </Suspense>
+        </div>
+      )}
 
       <Tabs defaultValue={dailyMenu ? "daily" : "menu"}>
         <TabsList>
