@@ -106,10 +106,28 @@ export const photos = pgTable("photos", {
 export const reviews = pgTable("reviews", {
   id: uuid("id").defaultRandom().primaryKey(),
   restaurantId: uuid("restaurant_id").notNull().references(() => restaurants.id, { onDelete: "cascade" }),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
   authorName: text("author_name").notNull(),
   authorEmail: text("author_email"),
   rating: integer("rating").notNull(), // 1-5
   comment: text("comment"),
   isApproved: boolean("is_approved").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const favorites = pgTable("favorites", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  restaurantId: uuid("restaurant_id").notNull().references(() => restaurants.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const userPreferences = pgTable("user_preferences", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),
+  dietaryPreferences: text("dietary_preferences"), // JSON: ["vegetarian", "gluten-free", ...]
+  favoritesCuisines: text("favorites_cuisines"), // JSON: ["česká", "italská", ...]
+  defaultCity: text("default_city"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

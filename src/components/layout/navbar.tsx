@@ -15,6 +15,7 @@ import {
   Search,
   Sun,
   Moon,
+  User,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 
@@ -108,12 +109,22 @@ export function Navbar() {
                   </Button>
                 </Link>
               )}
-              <Link href="/dashboard">
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <LayoutDashboard className="h-4 w-4" />
-                  Dashboard
-                </Button>
-              </Link>
+              {user.role === "restaurant" && (
+                <Link href="/dashboard">
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </Button>
+                </Link>
+              )}
+              {user.role === "user" && (
+                <Link href="/ucet">
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <User className="h-4 w-4" />
+                    Můj účet
+                  </Button>
+                </Link>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
@@ -130,6 +141,12 @@ export function Navbar() {
                 <Button variant="ghost" size="sm" className="gap-2">
                   <LogIn className="h-4 w-4" />
                   Přihlášení
+                </Button>
+              </Link>
+              <Link href="/registrace-host">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <User className="h-4 w-4" />
+                  Registrace
                 </Button>
               </Link>
               <Link href="/registrace">
@@ -179,15 +196,22 @@ export function Navbar() {
                       </Button>
                     </Link>
                   )}
-                  <Link href="/dashboard" onClick={() => setOpen(false)}>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start gap-2"
-                    >
-                      <LayoutDashboard className="h-4 w-4" />
-                      Dashboard
-                    </Button>
-                  </Link>
+                  {user.role === "restaurant" && (
+                    <Link href="/dashboard" onClick={() => setOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start gap-2">
+                        <LayoutDashboard className="h-4 w-4" />
+                        Dashboard
+                      </Button>
+                    </Link>
+                  )}
+                  {user.role === "user" && (
+                    <Link href="/ucet" onClick={() => setOpen(false)}>
+                      <Button variant="ghost" className="w-full justify-start gap-2">
+                        <User className="h-4 w-4" />
+                        Můj účet
+                      </Button>
+                    </Link>
+                  )}
                   <Button
                     variant="ghost"
                     className="w-full justify-start gap-2"
@@ -203,12 +227,15 @@ export function Navbar() {
               ) : (
                 <>
                   <Link href="/prihlaseni" onClick={() => setOpen(false)}>
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-start gap-2"
-                    >
+                    <Button variant="ghost" className="w-full justify-start gap-2">
                       <LogIn className="h-4 w-4" />
                       Přihlášení
+                    </Button>
+                  </Link>
+                  <Link href="/registrace-host" onClick={() => setOpen(false)}>
+                    <Button variant="outline" className="w-full justify-start gap-2">
+                      <User className="h-4 w-4" />
+                      Registrace (host)
                     </Button>
                   </Link>
                   <Link href="/registrace" onClick={() => setOpen(false)}>

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { restaurants, reviews } from "@/db/schema";
 import { eq, and, desc, avg, count } from "drizzle-orm";
+import { getSession } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
@@ -64,10 +65,14 @@ export async function POST(
       return NextResponse.json({ error: "Jméno a hodnocení jsou povinné" }, { status: 400 });
     }
 
+    // Attach user if logged in
+    const session = await getSession();
+
     const [review] = await db
       .insert(reviews)
       .values({
         restaurantId: restaurant.id,
+        userId: session?.userId || null,
         authorName,
         authorEmail: authorEmail || null,
         rating,
