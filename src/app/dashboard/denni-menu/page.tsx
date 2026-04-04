@@ -22,6 +22,7 @@ import {
   Soup,
   ChefHat,
   CakeSlice,
+  Copy,
 } from "lucide-react";
 
 interface DailyMenuItem {
@@ -138,10 +139,30 @@ export default function DailyMenuPage() {
             <p className="mb-4 text-muted-foreground">
               Dnešní denní menu ještě nebylo vytvořeno
             </p>
-            <Button onClick={createMenu} className="gap-2">
-              <Plus className="h-4 w-4" />
-              Vytvořit denní menu
-            </Button>
+            <div className="flex gap-2 justify-center">
+              <Button onClick={createMenu} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Vytvořit denní menu
+              </Button>
+              <Button variant="outline" className="gap-2" onClick={async () => {
+                setLoading(true);
+                const res = await fetch("/api/restaurants/me/daily-menu", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ action: "copyPrevious" }),
+                });
+                if (res.ok) {
+                  loadMenu();
+                } else {
+                  const data = await res.json();
+                  alert(data.error || "Chyba");
+                  setLoading(false);
+                }
+              }}>
+                <Copy className="h-4 w-4" />
+                Kopírovat včerejší
+              </Button>
+            </div>
           </CardContent>
         </Card>
       ) : (

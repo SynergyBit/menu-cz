@@ -6,6 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { StarRating, RatingBadge } from "@/components/star-rating";
+import { FavoriteButton } from "@/components/favorite-button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -188,6 +193,45 @@ export default function RestaurantDetailPage({
 
   const { restaurant: r, menu, dailyMenu, openingHours: hours } = data;
   const open = isOpenNow(hours);
+
+  // Reviews
+  const [reviewsData, setReviewsData] = useState<{
+    reviews: { id: string; authorName: string; rating: number; comment: string | null; createdAt: string }[];
+    avgRating: number;
+    totalReviews: number;
+  }>({ reviews: [], avgRating: 0, totalReviews: 0 });
+  const [reviewForm, setReviewForm] = useState({ authorName: "", rating: 0, comment: "" });
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+
+  useEffect(() => {
+    fetch(`/api/restaurants/${slug}/reviews`)
+      .then((res) => res.json())
+      .then(setReviewsData)
+      .catch(() => {});
+  }, [slug]);
+
+  async function submitReview(e: React.FormEvent) {
+    e.preventDefault();
+    if (!reviewForm.authorName || reviewForm.rating === 0) return;
+    setSubmittingReview(true);
+    try {
+      const res = await fetch(`/api/restaurants/${slug}/reviews`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(reviewForm),
+      });
+      if (res.ok) {
+        setReviewSubmitted(true);
+        setReviewForm({ authorName: "", rating: 0, comment: "" });
+        // Reload reviews
+        const data = await fetch(`/api/restaurants/${slug}/reviews`).then((r) => r.json());
+        setReviewsData(data);
+      }
+    } catch {} finally {
+      setSubmittingReview(false);
+    }
+  }
   const specialties: string[] = r.specialties ? JSON.parse(r.specialties) : [];
   const activeAmenities = amenityIcons.filter(
     (a) => r[a.key as keyof Restaurant]
@@ -216,10 +260,13 @@ export default function RestaurantDetailPage({
             Zpět
           </Button>
         </Link>
-        <Button variant="ghost" size="sm" className="gap-2" onClick={handleShare}>
-          <Share2 className="h-4 w-4" />
-          Sdílet
-        </Button>
+        <div className="flex items-center gap-2">
+          <FavoriteButton restaurantId={r.id} />
+          <Button variant="ghost" size="sm" className="gap-2" onClick={handleShare}>
+            <Share2 className="h-4 w-4" />
+            Sdílet
+          </Button>
+        </div>
       </div>
 
       {/* ===== VIZITKA HEADER ===== */}
@@ -272,6 +319,7 @@ export default function RestaurantDetailPage({
 
       {/* ===== INFO BAR ===== */}
       <div className="mb-6 flex flex-wrap items-center gap-2">
+        <RatingBadge rating={reviewsData.avgRating} count={reviewsData.totalReviews} />
         {r.cuisineType && <Badge variant="outline">{r.cuisineType}</Badge>}
         {r.priceRange && (
           <Badge variant="outline" className="font-mono">
@@ -421,6 +469,9 @@ export default function RestaurantDetailPage({
           )}
           <TabsTrigger value="menu">Jídelní lístek</TabsTrigger>
           <TabsTrigger value="hours">Otevírací doba</TabsTrigger>
+          <TabsTrigger value="reviews">
+            Recenze{reviewsData.totalReviews > 0 ? ` (${reviewsData.totalReviews})` : ""}
+          </TabsTrigger>
         </TabsList>
 
         {/* Daily menu */}
@@ -547,6 +598,96 @@ export default function RestaurantDetailPage({
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+        {/* Reviews */}
+        <TabsContent value="reviews" className="mt-6 space-y-6">
+          {/* Write review */}
+          {!reviewSubmitted ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Napsat recenzi</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={submitReview} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Hodnocení</Label>
+                    <StarRating
+                      rating={reviewForm.rating}
+                      interactive
+                      onChange={(r) => setReviewForm((f) => ({ ...f, rating: r }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="review-name">Vaše jméno</Label>
+                    <Input
+                      id="review-name"
+                      value={reviewForm.authorName}
+                      onChange={(e) => setReviewForm((f) => ({ ...f, authorName: e.target.value }))}
+                      placeholder="Jan"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="review-comment">Komentář (volitelné)</Label>
+                    <Textarea
+                      id="review-comment"
+                      value={reviewForm.comment}
+                      onChange={(e) => setReviewForm((f) => ({ ...f, comment: e.target.value }))}
+                      placeholder="Jak se vám líbilo?"
+                      rows={3}
+                    />
+                  </div>
+                  <Button
+                    type="submit"
+                    disabled={submittingReview || reviewForm.rating === 0 || !reviewForm.authorName}
+                  >
+                    Odeslat recenzi
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card className="border-green-500/20 bg-green-500/5">
+              <CardContent className="py-6 text-center">
+                <p className="font-semibold text-green-700 dark:text-green-400">
+                  Děkujeme za vaši recenzi!
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Reviews list */}
+          {reviewsData.reviews.length === 0 ? (
+            <Card className="py-8 text-center">
+              <CardContent>
+                <Star className="mx-auto mb-3 h-10 w-10 text-muted-foreground/30" />
+                <p className="text-muted-foreground">Zatím žádné recenze. Buďte první!</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {reviewsData.reviews.map((review) => (
+                <Card key={review.id}>
+                  <CardContent className="pt-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-sm">{review.authorName}</span>
+                          <StarRating rating={review.rating} size="sm" />
+                        </div>
+                        {review.comment && (
+                          <p className="mt-2 text-sm text-muted-foreground">{review.comment}</p>
+                        )}
+                      </div>
+                      <span className="shrink-0 text-xs text-muted-foreground">
+                        {new Date(review.createdAt).toLocaleDateString("cs-CZ")}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>

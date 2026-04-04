@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { restaurants, menuItems, openingHours, dailyMenus, dailyMenuItems } from "@/db/schema";
-import { eq, and, ilike, or, sql, count, gte, lte } from "drizzle-orm";
+import { restaurants, menuItems, openingHours, dailyMenus, dailyMenuItems, reviews } from "@/db/schema";
+import { eq, and, ilike, or, sql, count, gte, lte, avg } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   try {
@@ -73,11 +73,19 @@ export async function GET(request: NextRequest) {
           isOpenNow = currentTime >= todayHours.openTime && currentTime <= todayHours.closeTime;
         }
 
+        // Rating
+        const [ratingStats] = await db
+          .select({ avgRating: avg(reviews.rating), reviewCount: count() })
+          .from(reviews)
+          .where(and(eq(reviews.restaurantId, r.id), eq(reviews.isApproved, true)));
+
         return {
           ...r,
           menuItemCount: itemCount?.count || 0,
           hasDailyMenu: !!todayMenu,
           isOpenNow,
+          avgRating: ratingStats.avgRating ? parseFloat(String(ratingStats.avgRating)) : 0,
+          reviewCount: ratingStats.reviewCount || 0,
         };
       })
     );

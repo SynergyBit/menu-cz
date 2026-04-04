@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { db } from "@/db";
 import { restaurants } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export async function generateMetadata({
   params,
@@ -13,7 +13,7 @@ export async function generateMetadata({
   const [restaurant] = await db
     .select({ name: restaurants.name, city: restaurants.city, cuisineType: restaurants.cuisineType })
     .from(restaurants)
-    .where(and(eq(restaurants.slug, slug), eq(restaurants.isActive, true)))
+    .where(eq(restaurants.slug, slug))
     .limit(1);
 
   if (!restaurant) {

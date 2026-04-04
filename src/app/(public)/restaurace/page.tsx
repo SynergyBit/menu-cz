@@ -33,6 +33,8 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { RatingBadge } from "@/components/star-rating";
+import { FavoriteButton } from "@/components/favorite-button";
 
 const RestaurantMap = lazy(() =>
   import("@/components/restaurant-map").then((m) => ({
@@ -57,6 +59,8 @@ interface Restaurant {
   isOpenNow: boolean;
   latitude: number | null;
   longitude: number | null;
+  avgRating: number;
+  reviewCount: number;
 }
 
 const priceLabels: Record<number, string> = {
@@ -430,6 +434,9 @@ function RestauraceContent() {
                       </Badge>
                     )}
                   </div>
+                  <div className="absolute left-3 top-3">
+                    <FavoriteButton restaurantId={r.id} size="sm" />
+                  </div>
                   {r.logoUrl && (
                     <div className="absolute -bottom-5 left-4 h-12 w-12 overflow-hidden rounded-xl border-2 border-card bg-card shadow-md">
                       <img src={r.logoUrl} alt="" className="h-full w-full object-contain p-1" />
@@ -438,9 +445,16 @@ function RestauraceContent() {
                 </div>
                 <CardContent className={r.logoUrl ? "pt-8" : "pt-4"}>
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-semibold group-hover:text-primary transition-colors">
-                      {r.name}
-                    </h3>
+                    <div>
+                      <h3 className="font-semibold group-hover:text-primary transition-colors">
+                        {r.name}
+                      </h3>
+                      {r.reviewCount > 0 && (
+                        <div className="mt-1">
+                          <RatingBadge rating={r.avgRating} count={r.reviewCount} />
+                        </div>
+                      )}
+                    </div>
                     {r.priceRange && (
                       <span className="text-sm font-medium text-muted-foreground">
                         {priceLabels[r.priceRange]}

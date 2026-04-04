@@ -22,21 +22,20 @@ export const restaurants = pgTable("restaurants", {
   website: text("website"),
   logoUrl: text("logo_url"),
   coverUrl: text("cover_url"),
-  cuisineType: text("cuisine_type"), // česká, italská, asijská...
-  priceRange: integer("price_range").default(2), // 1-4
+  cuisineType: text("cuisine_type"),
+  priceRange: integer("price_range").default(2),
   latitude: doublePrecision("latitude"),
   longitude: doublePrecision("longitude"),
   isActive: boolean("is_active").default(false).notNull(),
-  plan: text("plan").notNull().default("free"), // 'free' | 'standard' | 'premium'
+  plan: text("plan").notNull().default("free"),
   planExpiresAt: timestamp("plan_expires_at"),
   isPremium: boolean("is_premium").default(false).notNull(),
-  // Vizitka fields
-  tagline: text("tagline"), // krátký slogan
+  tagline: text("tagline"),
   facebook: text("facebook"),
   instagram: text("instagram"),
   tiktok: text("tiktok"),
   googleMaps: text("google_maps"),
-  specialties: text("specialties"), // JSON array of specialties
+  specialties: text("specialties"),
   acceptsReservations: boolean("accepts_reservations").default(false),
   hasDelivery: boolean("has_delivery").default(false),
   hasTakeaway: boolean("has_takeaway").default(false),
@@ -44,7 +43,7 @@ export const restaurants = pgTable("restaurants", {
   hasWifi: boolean("has_wifi").default(false),
   hasOutdoorSeating: boolean("has_outdoor_seating").default(false),
   hasLiveMusic: boolean("has_live_music").default(false),
-  themeColor: text("theme_color"), // hex color for vizitka
+  themeColor: text("theme_color"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -65,7 +64,7 @@ export const menuItems = pgTable("menu_items", {
   price: numeric("price", { precision: 10, scale: 2 }).notNull(),
   imageUrl: text("image_url"),
   isAvailable: boolean("is_available").default(true).notNull(),
-  allergens: text("allergens"), // comma separated: 1,3,7
+  allergens: text("allergens"),
   sortOrder: integer("sort_order").default(0).notNull(),
 });
 
@@ -82,14 +81,14 @@ export const dailyMenuItems = pgTable("daily_menu_items", {
   name: text("name").notNull(),
   description: text("description"),
   price: numeric("price", { precision: 10, scale: 2 }).notNull(),
-  type: text("type").notNull().default("main"), // 'soup' | 'main' | 'dessert'
+  type: text("type").notNull().default("main"),
   sortOrder: integer("sort_order").default(0).notNull(),
 });
 
 export const openingHours = pgTable("opening_hours", {
   id: uuid("id").defaultRandom().primaryKey(),
   restaurantId: uuid("restaurant_id").notNull().references(() => restaurants.id, { onDelete: "cascade" }),
-  dayOfWeek: integer("day_of_week").notNull(), // 0=Po, 1=Út... 6=Ne
+  dayOfWeek: integer("day_of_week").notNull(),
   openTime: time("open_time"),
   closeTime: time("close_time"),
   isClosed: boolean("is_closed").default(false).notNull(),
@@ -101,5 +100,16 @@ export const photos = pgTable("photos", {
   url: text("url").notNull(),
   caption: text("caption"),
   sortOrder: integer("sort_order").default(0).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const reviews = pgTable("reviews", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  restaurantId: uuid("restaurant_id").notNull().references(() => restaurants.id, { onDelete: "cascade" }),
+  authorName: text("author_name").notNull(),
+  authorEmail: text("author_email"),
+  rating: integer("rating").notNull(), // 1-5
+  comment: text("comment"),
+  isApproved: boolean("is_approved").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
