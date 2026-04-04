@@ -37,7 +37,9 @@ import {
   Star,
   Share2,
   ExternalLink,
+  Loader2,
 } from "lucide-react";
+import { toast } from "sonner";
 
 const RestaurantMap = lazy(() =>
   import("@/components/restaurant-map").then((m) => ({
@@ -470,6 +472,11 @@ export default function RestaurantDetailPage({
         </div>
       )}
 
+      {/* ===== CONTACT FORM ===== */}
+      {hasPaidPlan && r.acceptsReservations && (
+        <ContactForm slug={r.slug} />
+      )}
+
       {/* ===== PHOTO GALLERY ===== */}
       {photoList && photoList.length > 0 && hasPaidPlan && (
         <div className="mb-8">
@@ -532,10 +539,32 @@ export default function RestaurantDetailPage({
           <TabsContent value="daily" className="mt-6">
             <Card>
               <CardHeader>
+                <div className="flex items-center justify-between">
                 <CardTitle className="flex items-center gap-2">
                   <Clock className="h-5 w-5 text-primary" />
                   Denní menu — {new Date().toLocaleDateString("cs-CZ")}
                 </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="gap-1.5"
+                  onClick={() => {
+                    const items = dailyMenu!.items
+                      .map((i) => `${i.name} — ${i.price} Kč`)
+                      .join("\n");
+                    const text = `🍽️ ${r.name} — Denní menu ${new Date().toLocaleDateString("cs-CZ")}\n\n${items}\n\n${window.location.href}`;
+                    if (navigator.share) {
+                      navigator.share({ title: `${r.name} — Denní menu`, text });
+                    } else {
+                      navigator.clipboard.writeText(text);
+                      toast.success("Denní menu zkopírováno");
+                    }
+                  }}
+                >
+                  <Share2 className="h-3.5 w-3.5" />
+                  Sdílet
+                </Button>
+              </div>
               </CardHeader>
               <CardContent className="space-y-3">
                 {dailyMenu.items.map((item) => {
@@ -744,5 +773,104 @@ export default function RestaurantDetailPage({
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+function ContactForm({ slug }: { slug: string }) {
+  const [form, setForm] = useState({
+    senderName: "",
+    senderEmail: "",
+    senderPhone: "",
+    subject: "reservation",
+    message: "",
+  });
+  const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setSending(true);
+    try {
+      const res = await fetch(`/api/restaurants/${slug}/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) {
+        setSent(true);
+      }
+    } catch {} finally {
+      setSending(false);
+    }
+  }
+
+  if (sent) {
+    return (
+      <Card className="mb-8 border-green-500/20 bg-green-500/5">
+        <CardContent className="py-6 text-center">
+          <CalendarCheck className="mx-auto mb-2 h-6 w-6 text-green-600" />
+          <p className="font-semibold text-green-700 dark:text-green-400">
+            Zpráva odeslána!
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Restaurace vám brzy odpoví.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="mb-8">
+      <CardHeader>
+        <CardTitle className="text-base flex items-center gap-2">
+          <Mail className="h-4 w-4 text-primary" />
+          Napište nám
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Input
+              placeholder="Vaše jméno *"
+              value={form.senderName}
+              onChange={(e) => setForm((f) => ({ ...f, senderName: e.target.value }))}
+              required
+            />
+            <Input
+              placeholder="Email"
+              type="email"
+              value={form.senderEmail}
+              onChange={(e) => setForm((f) => ({ ...f, senderEmail: e.target.value }))}
+            />
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Input
+              placeholder="Telefon"
+              value={form.senderPhone}
+              onChange={(e) => setForm((f) => ({ ...f, senderPhone: e.target.value }))}
+            />
+            <select
+              value={form.subject}
+              onChange={(e) => setForm((f) => ({ ...f, subject: e.target.value }))}
+              className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm"
+            >
+              <option value="reservation">Rezervace</option>
+              <option value="question">Dotaz</option>
+              <option value="feedback">Zpětná vazba</option>
+            </select>
+          </div>
+          <Textarea
+            placeholder="Vaše zpráva *"
+            value={form.message}
+            onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
+            rows={3}
+            required
+          />
+          <Button type="submit" disabled={sending} className="gap-2">
+            {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
+            Odeslat zprávu
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

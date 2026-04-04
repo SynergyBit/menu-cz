@@ -129,6 +129,18 @@ export const pageViews = pgTable("page_views", {
   date: timestamp("date").defaultNow().notNull(),
 });
 
+export const messages = pgTable("messages", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  restaurantId: uuid("restaurant_id").notNull().references(() => restaurants.id, { onDelete: "cascade" }),
+  senderName: text("sender_name").notNull(),
+  senderEmail: text("sender_email"),
+  senderPhone: text("sender_phone"),
+  subject: text("subject").notNull(), // 'reservation' | 'question' | 'feedback'
+  message: text("message").notNull(),
+  isRead: boolean("is_read").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const userPreferences = pgTable("user_preferences", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),

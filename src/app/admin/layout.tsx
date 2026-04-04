@@ -51,6 +51,16 @@ export default function AdminLayout({
                   Restaurace
                 </Button>
               </Link>
+              <Link href="/admin/recenze">
+                <Button variant={pathname === "/admin/recenze" ? "secondary" : "ghost"} size="sm">
+                  Recenze
+                </Button>
+              </Link>
+              <Link href="/admin/uzivatele">
+                <Button variant={pathname === "/admin/uzivatele" ? "secondary" : "ghost"} size="sm">
+                  Uživatelé
+                </Button>
+              </Link>
             </nav>
           </div>
           <div className="flex items-center gap-2">
