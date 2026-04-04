@@ -19,7 +19,20 @@ import {
   FileText,
   List,
   Map,
+  SlidersHorizontal,
+  X,
 } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 
 const RestaurantMap = lazy(() =>
   import("@/components/restaurant-map").then((m) => ({
@@ -81,34 +94,35 @@ export default function RestauracePage() {
   );
 }
 
+const cuisineOptions = ["Česká", "Italská", "Asijská", "Mexická", "Indická", "Francouzská", "Vegetariánská", "Veganská", "Mezinárodní", "Fast food", "Kavárna"];
+
 function RestauraceContent() {
   const searchParams = useSearchParams();
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState(searchParams.get("q") || "");
   const [view, setView] = useState<"list" | "map">("list");
+  const [filterOpen, setFilterOpen] = useState(false);
 
-  useEffect(() => {
-    const q = searchParams.get("q") || "";
-    const cuisine = searchParams.get("cuisine") || "";
-    setQuery(q);
+  // Filters
+  const [cuisine, setCuisine] = useState(searchParams.get("cuisine") || "");
+  const [city, setCity] = useState("");
+  const [priceRange, setPriceRange] = useState("");
+  const [onlyOpen, setOnlyOpen] = useState(false);
+  const [onlyDailyMenu, setOnlyDailyMenu] = useState(false);
 
-    const params = new URLSearchParams();
-    if (q) params.set("q", q);
-    if (cuisine) params.set("cuisine", cuisine);
-
-    fetch(`/api/restaurants?${params}`)
-      .then((r) => r.json())
-      .then((data) => setRestaurants(data.restaurants || []))
-      .catch(() => setRestaurants([]))
-      .finally(() => setLoading(false));
-  }, [searchParams]);
-
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
+  function buildParams() {
     const params = new URLSearchParams();
     if (query.trim()) params.set("q", query.trim());
-    window.history.pushState({}, "", `/restaurace?${params}`);
+    if (cuisine) params.set("cuisine", cuisine);
+    if (city) params.set("city", city);
+    if (priceRange) params.set("price", priceRange);
+    if (onlyOpen) params.set("open", "1");
+    if (onlyDailyMenu) params.set("daily", "1");
+    return params;
+  }
+
+  function fetchRestaurants(params: URLSearchParams) {
     setLoading(true);
     fetch(`/api/restaurants?${params}`)
       .then((r) => r.json())
@@ -117,16 +131,65 @@ function RestauraceContent() {
       .finally(() => setLoading(false));
   }
 
+  useEffect(() => {
+    const q = searchParams.get("q") || "";
+    const c = searchParams.get("cuisine") || "";
+    setQuery(q);
+    setCuisine(c);
+    const params = new URLSearchParams();
+    if (q) params.set("q", q);
+    if (c) params.set("cuisine", c);
+    fetchRestaurants(params);
+  }, [searchParams]);
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const params = buildParams();
+    window.history.pushState({}, "", `/restaurace?${params}`);
+    fetchRestaurants(params);
+  }
+
+  function applyFilters() {
+    const params = buildParams();
+    window.history.pushState({}, "", `/restaurace?${params}`);
+    fetchRestaurants(params);
+    setFilterOpen(false);
+  }
+
+  function clearFilters() {
+    setCuisine("");
+    setCity("");
+    setPriceRange("");
+    setOnlyOpen(false);
+    setOnlyDailyMenu(false);
+    const params = new URLSearchParams();
+    if (query.trim()) params.set("q", query.trim());
+    window.history.pushState({}, "", `/restaurace?${params}`);
+    fetchRestaurants(params);
+    setFilterOpen(false);
+  }
+
+  const activeFilterCount = [cuisine, city, priceRange, onlyOpen, onlyDailyMenu].filter(Boolean).length;
+
+  // Client-side filtering for open/daily (API already returns the data)
+  let filtered = restaurants;
+  if (onlyOpen) filtered = filtered.filter((r) => r.isOpenNow);
+  if (onlyDailyMenu) filtered = filtered.filter((r) => r.hasDailyMenu);
+  if (priceRange) filtered = filtered.filter((r) => r.priceRange === Number(priceRange));
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Restaurace</h1>
         <p className="mt-2 text-muted-foreground">
-          Najděte restauraci a prohlédněte si její menu
+          {!loading && filtered.length > 0
+            ? `${filtered.length} ${filtered.length === 1 ? "restaurace" : filtered.length < 5 ? "restaurace" : "restaurací"}`
+            : "Najděte restauraci a prohlédněte si její menu"}
         </p>
       </div>
 
-      <div className="mb-8 flex gap-2">
+      {/* Search + View toggle + Filter */}
+      <div className="mb-6 flex gap-2">
         <form onSubmit={handleSearch} className="flex flex-1 gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -141,7 +204,94 @@ function RestauraceContent() {
             Hledat
           </Button>
         </form>
-        <div className="flex rounded-lg border">
+        <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
+          <SheetTrigger render={<Button variant="outline" className="h-11 gap-2 shrink-0" />}>
+            <SlidersHorizontal className="h-4 w-4" />
+            <span className="hidden sm:inline">Filtry</span>
+            {activeFilterCount > 0 && (
+              <Badge className="ml-1 h-5 w-5 rounded-full p-0 text-xs flex items-center justify-center">
+                {activeFilterCount}
+              </Badge>
+            )}
+          </SheetTrigger>
+          <SheetContent side="right" className="w-80">
+            <div className="flex flex-col h-full pt-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-semibold">Filtry</h3>
+                {activeFilterCount > 0 && (
+                  <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-1.5 text-xs">
+                    <X className="h-3 w-3" />
+                    Vymazat
+                  </Button>
+                )}
+              </div>
+              <div className="flex-1 space-y-6">
+                <div className="space-y-2">
+                  <Label>Typ kuchyně</Label>
+                  <Select value={cuisine} onValueChange={(v) => setCuisine(v || "")}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Všechny kuchyně" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cuisineOptions.map((c) => (
+                        <SelectItem key={c} value={c.toLowerCase()}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Město</Label>
+                  <Input
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="Např. Praha"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Cenová úroveň</Label>
+                  <Select value={priceRange} onValueChange={(v) => setPriceRange(v || "")}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Jakákoliv" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="1">$ — Levné</SelectItem>
+                      <SelectItem value="2">$$ — Střední</SelectItem>
+                      <SelectItem value="3">$$$ — Dražší</SelectItem>
+                      <SelectItem value="4">$$$$ — Luxusní</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <Separator />
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="onlyOpen" className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-green-600" />
+                    Otevřeno teď
+                  </Label>
+                  <Switch id="onlyOpen" checked={onlyOpen} onCheckedChange={setOnlyOpen} />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="onlyDaily" className="flex items-center gap-2">
+                    <CalendarDays className="h-4 w-4 text-primary" />
+                    Má denní menu
+                  </Label>
+                  <Switch id="onlyDaily" checked={onlyDailyMenu} onCheckedChange={setOnlyDailyMenu} />
+                </div>
+              </div>
+
+              <div className="pt-4 border-t space-y-2">
+                <Button onClick={applyFilters} className="w-full">
+                  Zobrazit výsledky
+                </Button>
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+        <div className="hidden sm:flex rounded-lg border">
           <Button
             variant={view === "list" ? "secondary" : "ghost"}
             size="icon"
@@ -161,13 +311,51 @@ function RestauraceContent() {
         </div>
       </div>
 
+      {/* Active filter chips */}
+      {activeFilterCount > 0 && (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {cuisine && (
+            <Badge variant="secondary" className="gap-1.5">
+              {cuisine}
+              <button onClick={() => { setCuisine(""); applyFilters(); }}>
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )}
+          {city && (
+            <Badge variant="secondary" className="gap-1.5">
+              <MapPin className="h-3 w-3" />{city}
+              <button onClick={() => { setCity(""); applyFilters(); }}>
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )}
+          {onlyOpen && (
+            <Badge variant="secondary" className="gap-1.5">
+              <Clock className="h-3 w-3" />Otevřeno
+              <button onClick={() => { setOnlyOpen(false); applyFilters(); }}>
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )}
+          {onlyDailyMenu && (
+            <Badge variant="secondary" className="gap-1.5">
+              <CalendarDays className="h-3 w-3" />Denní menu
+              <button onClick={() => { setOnlyDailyMenu(false); applyFilters(); }}>
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )}
+        </div>
+      )}
+
       {/* Map view */}
-      {view === "map" && !loading && restaurants.length > 0 && (
+      {view === "map" && !loading && filtered.length > 0 && (
         <div className="mb-6">
           <Suspense fallback={<Skeleton className="h-[450px] w-full rounded-xl" />}>
             <RestaurantMap
               className="h-[450px] w-full rounded-xl border"
-              markers={restaurants
+              markers={filtered
                 .filter((r) => r.latitude && r.longitude)
                 .map((r) => ({
                   lat: r.latitude!,
@@ -179,9 +367,9 @@ function RestauraceContent() {
                 }))}
             />
           </Suspense>
-          {restaurants.filter((r) => !r.latitude || !r.longitude).length > 0 && (
+          {filtered.filter((r) => !r.latitude || !r.longitude).length > 0 && (
             <p className="mt-2 text-xs text-muted-foreground">
-              {restaurants.filter((r) => !r.latitude || !r.longitude).length} restaurací bez zadané adresy se nezobrazuje na mapě
+              {filtered.filter((r) => !r.latitude || !r.longitude).length} restaurací bez zadané adresy se nezobrazuje na mapě
             </p>
           )}
         </div>
@@ -199,7 +387,7 @@ function RestauraceContent() {
             </Card>
           ))}
         </div>
-      ) : restaurants.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <Card className="py-16 text-center">
           <CardContent>
             <UtensilsCrossed className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
@@ -213,7 +401,7 @@ function RestauraceContent() {
         </Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {restaurants.map((r) => (
+          {filtered.map((r) => (
             <Link key={r.id} href={`/restaurace/${r.slug}`}>
               <Card className="group h-full overflow-hidden transition-all hover:border-primary/30 hover:shadow-lg">
                 <div className="relative h-40 bg-gradient-to-br from-primary/10 to-warm/10">

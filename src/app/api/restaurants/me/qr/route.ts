@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const format = searchParams.get("format") || "png";
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || request.headers.get("x-forwarded-proto") + "://" + request.headers.get("host");
-  const menuUrl = `${baseUrl}/restaurace/${restaurant.slug}`;
+  const menuUrl = `${baseUrl}/m/${restaurant.slug}`;
 
   if (format === "svg") {
     const svg = await QRCode.toString(menuUrl, {

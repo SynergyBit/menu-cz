@@ -40,6 +40,18 @@ export default function AdminLayout({
               <Shield className="h-3.5 w-3.5" />
               Admin
             </div>
+            <nav className="hidden sm:flex items-center gap-1 ml-4">
+              <Link href="/admin">
+                <Button variant={pathname === "/admin" ? "secondary" : "ghost"} size="sm">
+                  Dashboard
+                </Button>
+              </Link>
+              <Link href="/admin/restaurace">
+                <Button variant={pathname === "/admin/restaurace" ? "secondary" : "ghost"} size="sm">
+                  Restaurace
+                </Button>
+              </Link>
+            </nav>
           </div>
           <div className="flex items-center gap-2">
             <Link href="/">
