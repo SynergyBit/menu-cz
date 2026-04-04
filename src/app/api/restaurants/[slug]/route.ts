@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { restaurants, menuCategories, menuItems, dailyMenus, dailyMenuItems, openingHours } from "@/db/schema";
+import { restaurants, menuCategories, menuItems, dailyMenus, dailyMenuItems, openingHours, photos } from "@/db/schema";
 import { eq, and, gte, lte } from "drizzle-orm";
 
 export async function GET(
@@ -72,11 +72,19 @@ export async function GET(
       .where(eq(openingHours.restaurantId, restaurant.id))
       .orderBy(openingHours.dayOfWeek);
 
+    // Photos
+    const photoList = await db
+      .select()
+      .from(photos)
+      .where(eq(photos.restaurantId, restaurant.id))
+      .orderBy(photos.sortOrder);
+
     return NextResponse.json({
       restaurant,
       menu: categoriesWithItems,
       dailyMenu: todayMenu ? { ...todayMenu, items: dailyItems } : null,
       openingHours: hours,
+      photos: photoList,
     });
   } catch (error) {
     console.error("Restaurant detail error:", error);

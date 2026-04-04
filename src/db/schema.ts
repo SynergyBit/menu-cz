@@ -122,6 +122,13 @@ export const favorites = pgTable("favorites", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const pageViews = pgTable("page_views", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  restaurantId: uuid("restaurant_id").notNull().references(() => restaurants.id, { onDelete: "cascade" }),
+  viewType: text("view_type").notNull().default("page"), // 'page' | 'qr' | 'menu' | 'daily_menu'
+  date: timestamp("date").defaultNow().notNull(),
+});
+
 export const userPreferences = pgTable("user_preferences", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),

@@ -12,6 +12,8 @@ import {
   Clock,
   QrCode,
   IdCard,
+  ImageIcon,
+  BarChart3,
   LogOut,
   ChevronLeft,
   Menu,
@@ -25,7 +27,9 @@ const sidebarLinks = [
   { href: "/dashboard/denni-menu", label: "Denní menu", icon: CalendarDays },
   { href: "/dashboard/hodiny", label: "Otevírací doba", icon: Clock },
   { href: "/dashboard/vizitka", label: "Vizitka", icon: IdCard },
+  { href: "/dashboard/fotky", label: "Fotogalerie", icon: ImageIcon },
   { href: "/dashboard/qr-kod", label: "QR kód", icon: QrCode },
+  { href: "/dashboard/analytika", label: "Analytika", icon: BarChart3 },
 ];
 
 function SidebarContent({ pathname, onLogout }: { pathname: string; onLogout: () => void }) {

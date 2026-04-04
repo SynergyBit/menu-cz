@@ -155,6 +155,7 @@ export default function RestaurantDetailPage({
     menu: MenuCategory[];
     dailyMenu: { items: DailyMenuItem[] } | null;
     openingHours: OpeningHour[];
+    photos: { id: string; url: string; caption: string | null }[];
   } | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -164,6 +165,13 @@ export default function RestaurantDetailPage({
       .then(setData)
       .catch(() => setData(null))
       .finally(() => setLoading(false));
+
+    // Track page view
+    fetch("/api/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug, viewType: "page" }),
+    }).catch(() => {});
   }, [slug]);
 
   if (loading) {
@@ -191,7 +199,8 @@ export default function RestaurantDetailPage({
     );
   }
 
-  const { restaurant: r, menu, dailyMenu, openingHours: hours } = data;
+  const { restaurant: r, menu, dailyMenu, openingHours: hours, photos: photoList } = data;
+  const [lightboxPhoto, setLightboxPhoto] = useState<string | null>(null);
   const open = isOpenNow(hours);
 
   // Reviews
@@ -458,6 +467,50 @@ export default function RestaurantDetailPage({
               zoom={15}
             />
           </Suspense>
+        </div>
+      )}
+
+      {/* ===== PHOTO GALLERY ===== */}
+      {photoList && photoList.length > 0 && hasPaidPlan && (
+        <div className="mb-8">
+          <h2 className="mb-3 text-lg font-semibold">Fotogalerie</h2>
+          <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 md:grid-cols-4">
+            {photoList.map((photo) => (
+              <button
+                key={photo.id}
+                onClick={() => setLightboxPhoto(photo.url)}
+                className="group relative aspect-square overflow-hidden rounded-xl"
+              >
+                <img
+                  src={photo.url}
+                  alt={photo.caption || "Fotka"}
+                  className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {lightboxPhoto && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          onClick={() => setLightboxPhoto(null)}
+        >
+          <img
+            src={lightboxPhoto}
+            alt="Fotka"
+            className="max-h-[85vh] max-w-full rounded-xl object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            onClick={() => setLightboxPhoto(null)}
+            className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
+          >
+            ✕
+          </button>
         </div>
       )}
 

@@ -95,6 +95,13 @@ export default function MobilePage({
       .then(setData)
       .catch(() => setData(null))
       .finally(() => setLoading(false));
+
+    // Track QR scan
+    fetch("/api/track", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug, viewType: "qr" }),
+    }).catch(() => {});
   }, [slug]);
 
   if (loading) {

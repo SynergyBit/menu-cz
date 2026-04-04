@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { SearchBar } from "@/components/search-bar";
+import { FeaturedRestaurants } from "@/components/featured-restaurants";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -109,18 +111,6 @@ function AnimatedCounter({ end, label }: { end: number; label: string }) {
 }
 
 export default function HomePage() {
-  const [query, setQuery] = useState("");
-  const router = useRouter();
-
-  function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
-    if (query.trim()) {
-      router.push(`/restaurace?q=${encodeURIComponent(query.trim())}`);
-    } else {
-      router.push("/restaurace");
-    }
-  }
-
   return (
     <div>
       {/* Hero */}
@@ -182,25 +172,11 @@ export default function HomePage() {
               oblíbenou restauraci. Vše přehledně na jednom místě.
             </p>
 
-            {/* Search bar */}
-            <form
-              onSubmit={handleSearch}
-              className="mx-auto mt-10 flex max-w-xl gap-2"
-            >
-              <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Název restaurace, město, typ kuchyně..."
-                  className="h-14 rounded-xl pl-12 text-base shadow-lg shadow-primary/5 border-border/50 focus:border-primary/30"
-                />
-              </div>
-              <Button type="submit" size="lg" className="h-14 rounded-xl px-8 shadow-lg shadow-primary/20">
-                <Search className="mr-2 h-4 w-4" />
-                Hledat
-              </Button>
-            </form>
+            {/* Search bar with autocomplete */}
+            <SearchBar
+              className="mx-auto mt-10 max-w-xl"
+              inputClassName="h-14 rounded-xl pl-12 text-base shadow-lg shadow-primary/5 border-border/50 focus:border-primary/30"
+            />
 
             {/* Cuisine chips */}
             <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
@@ -268,6 +244,17 @@ export default function HomePage() {
               </Card>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Featured restaurants */}
+      <section className="border-t py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="mb-8 text-center">
+            <h2 className="text-2xl font-bold sm:text-3xl">Objevte restaurace</h2>
+            <p className="mt-3 text-muted-foreground">Nejlépe hodnocené, s denním menu a nově přidané</p>
+          </div>
+          <FeaturedRestaurants />
         </div>
       </section>
 
