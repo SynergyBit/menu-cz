@@ -16,9 +16,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MenuCZ — Najdi restauraci, prohlédni si menu",
+  title: {
+    default: "MenuCZ — Najdi restauraci, prohlédni si menu",
+    template: "%s | MenuCZ",
+  },
   description:
     "Interaktivní vyhledávač restaurací. Prohlédni si jídelní lístek, denní menu a otevírací dobu restaurací ve tvém okolí.",
+  manifest: "/manifest.json",
+  openGraph: {
+    type: "website",
+    locale: "cs_CZ",
+    siteName: "MenuCZ",
+    title: "MenuCZ — Vyhledávač restaurací",
+    description: "Prohlédněte si jídelní lístek, denní menu a najděte svou oblíbenou restauraci.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

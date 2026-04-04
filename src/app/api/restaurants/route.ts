@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
-import { restaurants, menuItems, openingHours, dailyMenus, dailyMenuItems, reviews } from "@/db/schema";
-import { eq, and, ilike, or, sql, count, gte, lte, avg } from "drizzle-orm";
+import { restaurants, menuItems, openingHours, dailyMenus, reviews } from "@/db/schema";
+import { eq, and, ilike, or, sql, count, gte, lte, avg, inArray } from "drizzle-orm";
 
 export async function GET(request: NextRequest) {
   try {
@@ -31,71 +31,92 @@ export async function GET(request: NextRequest) {
       .where(and(...conditions))
       .orderBy(sql`${restaurants.isPremium} DESC, ${restaurants.name} ASC`);
 
-    // Enrich with menu item counts and opening hours
-    const enriched = await Promise.all(
-      result.map(async (r) => {
-        const [itemCount] = await db
-          .select({ count: count() })
-          .from(menuItems)
-          .where(eq(menuItems.restaurantId, r.id));
+    if (result.length === 0) {
+      return NextResponse.json({ restaurants: [] });
+    }
 
-        const hours = await db
-          .select()
-          .from(openingHours)
-          .where(eq(openingHours.restaurantId, r.id))
-          .orderBy(openingHours.dayOfWeek);
+    const restaurantIds = result.map((r) => r.id);
 
-        // Check if has today's daily menu
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1);
+    // Batch: menu item counts
+    const itemCounts = await db
+      .select({ restaurantId: menuItems.restaurantId, count: count() })
+      .from(menuItems)
+      .where(inArray(menuItems.restaurantId, restaurantIds))
+      .groupBy(menuItems.restaurantId);
+    const itemCountMap = new Map(itemCounts.map((c) => [c.restaurantId, c.count]));
 
-        const [todayMenu] = await db
-          .select({ id: dailyMenus.id })
-          .from(dailyMenus)
-          .where(
-            and(
-              eq(dailyMenus.restaurantId, r.id),
-              gte(dailyMenus.date, today),
-              lte(dailyMenus.date, tomorrow)
-            )
-          )
-          .limit(1);
+    // Batch: opening hours
+    const allHours = await db
+      .select()
+      .from(openingHours)
+      .where(inArray(openingHours.restaurantId, restaurantIds));
+    const hoursMap = new Map<string, typeof allHours>();
+    for (const h of allHours) {
+      const arr = hoursMap.get(h.restaurantId) || [];
+      arr.push(h);
+      hoursMap.set(h.restaurantId, arr);
+    }
 
-        // Check if open now
-        const now = new Date();
-        const dayOfWeek = (now.getDay() + 6) % 7; // Convert Sunday=0 to Monday=0
-        const todayHours = hours.find((h) => h.dayOfWeek === dayOfWeek);
-        let isOpenNow = false;
-        if (todayHours && !todayHours.isClosed && todayHours.openTime && todayHours.closeTime) {
-          const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-          isOpenNow = currentTime >= todayHours.openTime && currentTime <= todayHours.closeTime;
-        }
+    // Batch: today's daily menus
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
-        // Rating
-        const [ratingStats] = await db
-          .select({ avgRating: avg(reviews.rating), reviewCount: count() })
-          .from(reviews)
-          .where(and(eq(reviews.restaurantId, r.id), eq(reviews.isApproved, true)));
+    const todayMenus = await db
+      .select({ restaurantId: dailyMenus.restaurantId })
+      .from(dailyMenus)
+      .where(
+        and(
+          inArray(dailyMenus.restaurantId, restaurantIds),
+          gte(dailyMenus.date, today),
+          lte(dailyMenus.date, tomorrow)
+        )
+      );
+    const dailyMenuIds = new Set(todayMenus.map((m) => m.restaurantId));
 
-        return {
-          ...r,
-          menuItemCount: itemCount?.count || 0,
-          hasDailyMenu: !!todayMenu,
-          isOpenNow,
-          avgRating: ratingStats.avgRating ? parseFloat(String(ratingStats.avgRating)) : 0,
-          reviewCount: ratingStats.reviewCount || 0,
-        };
+    // Batch: ratings
+    const ratings = await db
+      .select({
+        restaurantId: reviews.restaurantId,
+        avgRating: avg(reviews.rating),
+        reviewCount: count(),
       })
+      .from(reviews)
+      .where(and(inArray(reviews.restaurantId, restaurantIds), eq(reviews.isApproved, true)))
+      .groupBy(reviews.restaurantId);
+    const ratingMap = new Map(
+      ratings.map((r) => [r.restaurantId, { avg: parseFloat(String(r.avgRating || 0)), count: r.reviewCount }])
     );
+
+    // Check open now
+    const now = new Date();
+    const dayOfWeek = (now.getDay() + 6) % 7;
+    const currentTime = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+
+    const enriched = result.map((r) => {
+      const hours = hoursMap.get(r.id) || [];
+      const todayHours = hours.find((h) => h.dayOfWeek === dayOfWeek);
+      let isOpenNow = false;
+      if (todayHours && !todayHours.isClosed && todayHours.openTime && todayHours.closeTime) {
+        isOpenNow = currentTime >= todayHours.openTime && currentTime <= todayHours.closeTime;
+      }
+
+      const rating = ratingMap.get(r.id);
+
+      return {
+        ...r,
+        menuItemCount: itemCountMap.get(r.id) || 0,
+        hasDailyMenu: dailyMenuIds.has(r.id),
+        isOpenNow,
+        avgRating: rating?.avg || 0,
+        reviewCount: rating?.count || 0,
+      };
+    });
 
     return NextResponse.json({ restaurants: enriched });
   } catch (error) {
     console.error("Restaurants API error:", error);
-    return NextResponse.json(
-      { error: "Chyba při načítání restaurací" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Chyba při načítání restaurací" }, { status: 500 });
   }
 }

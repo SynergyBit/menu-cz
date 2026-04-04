@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { restaurants, reviews } from "@/db/schema";
 import { eq, and, desc, avg, count } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
+import { sanitize, checkRateLimit } from "@/lib/validation";
 
 export async function GET(
   request: NextRequest,
@@ -59,10 +60,23 @@ export async function POST(
   }
 
   try {
-    const { authorName, authorEmail, rating, comment } = await request.json();
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    if (!checkRateLimit(`review:${ip}`, 5, 3600000)) {
+      return NextResponse.json({ error: "Příliš mnoho recenzí. Zkuste to později." }, { status: 429 });
+    }
+
+    const body = await request.json();
+    const authorName = sanitize(body.authorName);
+    const authorEmail = sanitize(body.authorEmail);
+    const rating = Number(body.rating);
+    const comment = sanitize(body.comment);
 
     if (!authorName || !rating || rating < 1 || rating > 5) {
       return NextResponse.json({ error: "Jméno a hodnocení jsou povinné" }, { status: 400 });
+    }
+
+    if (authorName.length > 100 || (comment && comment.length > 2000)) {
+      return NextResponse.json({ error: "Příliš dlouhý text" }, { status: 400 });
     }
 
     // Attach user if logged in

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { restaurants, messages } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { sanitize, checkRateLimit } from "@/lib/validation";
 
 export async function POST(
   request: NextRequest,
@@ -24,10 +25,24 @@ export async function POST(
   }
 
   try {
-    const { senderName, senderEmail, senderPhone, subject, message } = await request.json();
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    if (!checkRateLimit(`contact:${ip}`, 5, 3600000)) {
+      return NextResponse.json({ error: "Příliš mnoho zpráv. Zkuste to později." }, { status: 429 });
+    }
+
+    const body = await request.json();
+    const senderName = sanitize(body.senderName);
+    const senderEmail = sanitize(body.senderEmail);
+    const senderPhone = sanitize(body.senderPhone);
+    const subject = sanitize(body.subject);
+    const message = sanitize(body.message);
 
     if (!senderName || !subject || !message) {
       return NextResponse.json({ error: "Jméno, předmět a zpráva jsou povinné" }, { status: 400 });
+    }
+
+    if (message.length > 5000 || senderName.length > 100) {
+      return NextResponse.json({ error: "Příliš dlouhý text" }, { status: 400 });
     }
 
     const [msg] = await db
