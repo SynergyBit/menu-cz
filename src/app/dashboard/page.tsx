@@ -19,7 +19,11 @@ import {
   ImageIcon,
   MapPin,
   Phone,
+  Crown,
+  ArrowRight,
+  Palette,
 } from "lucide-react";
+import { PlanBadge } from "@/components/premium-gate";
 
 interface Restaurant {
   id: string;
@@ -27,6 +31,7 @@ interface Restaurant {
   slug: string;
   isActive: boolean;
   isPremium: boolean;
+  plan: string;
   city: string | null;
   address: string | null;
   phone: string | null;
@@ -125,6 +130,7 @@ export default function DashboardPage() {
         </div>
         {restaurant && (
           <div className="flex items-center gap-2">
+            <PlanBadge plan={restaurant?.plan || "free"} />
             <Badge variant={restaurant.isActive ? "default" : "secondary"}>
               {restaurant.isActive ? "Aktivní" : "Neaktivní"}
             </Badge>
@@ -338,6 +344,29 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Upgrade CTA for free plan */}
+      {restaurant?.plan === "free" && (
+        <Card className="overflow-hidden border-primary/20 bg-gradient-to-r from-primary/5 via-card to-warm/5">
+          <CardContent className="flex items-center gap-6 py-6">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg shadow-primary/20">
+              <Crown className="h-7 w-7" />
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold">Odemkněte plný potenciál</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Denní menu, QR kódy, sociální sítě, mapa a další — od 299 Kč/měsíc
+              </p>
+            </div>
+            <Link href="/cenik">
+              <Button className="gap-2 shrink-0">
+                Zobrazit plány
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

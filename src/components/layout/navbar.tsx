@@ -44,6 +44,7 @@ export function Navbar() {
 
   const navLinks = [
     { href: "/restaurace", label: "Restaurace", icon: Search },
+    { href: "/cenik", label: "Ceník", icon: Search }, // uses Search icon as placeholder
   ];
 
   return (

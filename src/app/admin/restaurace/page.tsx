@@ -24,6 +24,14 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 interface AdminRestaurant {
   id: string;
   name: string;
@@ -32,6 +40,7 @@ interface AdminRestaurant {
   cuisineType: string | null;
   isActive: boolean;
   isPremium: boolean;
+  plan: string;
   createdAt: string;
   ownerName: string | null;
   ownerEmail: string | null;
@@ -51,6 +60,15 @@ export default function AdminRestauracePage() {
   useEffect(() => {
     loadRestaurants();
   }, []);
+
+  async function changePlan(id: string, plan: string) {
+    await fetch("/api/admin/restaurants", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, plan, isPremium: plan === "premium" }),
+    });
+    loadRestaurants();
+  }
 
   async function toggleField(
     id: string,
@@ -139,8 +157,8 @@ export default function AdminRestauracePage() {
                   <TableHead>Majitel</TableHead>
                   <TableHead>Město</TableHead>
                   <TableHead>Kuchyně</TableHead>
+                  <TableHead>Plán</TableHead>
                   <TableHead>Aktivní</TableHead>
-                  <TableHead>Premium</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
               </TableHeader>
@@ -159,18 +177,25 @@ export default function AdminRestauracePage() {
                     <TableCell>{r.city || "—"}</TableCell>
                     <TableCell>{r.cuisineType || "—"}</TableCell>
                     <TableCell>
+                      <Select
+                        value={r.plan || "free"}
+                        onValueChange={(v) => v && changePlan(r.id, v)}
+                      >
+                        <SelectTrigger className="w-28 h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="free">Zdarma</SelectItem>
+                          <SelectItem value="standard">Standard</SelectItem>
+                          <SelectItem value="premium">Premium</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
                       <Switch
                         checked={r.isActive}
                         onCheckedChange={(v) =>
                           toggleField(r.id, "isActive", v)
-                        }
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Switch
-                        checked={r.isPremium}
-                        onCheckedChange={(v) =>
-                          toggleField(r.id, "isPremium", v)
                         }
                       />
                     </TableCell>

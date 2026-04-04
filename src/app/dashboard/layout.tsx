@@ -11,6 +11,7 @@ import {
   CalendarDays,
   Clock,
   QrCode,
+  IdCard,
   LogOut,
   ChevronLeft,
   Menu,
@@ -23,6 +24,7 @@ const sidebarLinks = [
   { href: "/dashboard/menu", label: "Jídelní lístek", icon: FileText },
   { href: "/dashboard/denni-menu", label: "Denní menu", icon: CalendarDays },
   { href: "/dashboard/hodiny", label: "Otevírací doba", icon: Clock },
+  { href: "/dashboard/vizitka", label: "Vizitka", icon: IdCard },
   { href: "/dashboard/qr-kod", label: "QR kód", icon: QrCode },
 ];
 

@@ -27,7 +27,24 @@ export const restaurants = pgTable("restaurants", {
   latitude: doublePrecision("latitude"),
   longitude: doublePrecision("longitude"),
   isActive: boolean("is_active").default(false).notNull(),
+  plan: text("plan").notNull().default("free"), // 'free' | 'standard' | 'premium'
+  planExpiresAt: timestamp("plan_expires_at"),
   isPremium: boolean("is_premium").default(false).notNull(),
+  // Vizitka fields
+  tagline: text("tagline"), // krátký slogan
+  facebook: text("facebook"),
+  instagram: text("instagram"),
+  tiktok: text("tiktok"),
+  googleMaps: text("google_maps"),
+  specialties: text("specialties"), // JSON array of specialties
+  acceptsReservations: boolean("accepts_reservations").default(false),
+  hasDelivery: boolean("has_delivery").default(false),
+  hasTakeaway: boolean("has_takeaway").default(false),
+  hasParking: boolean("has_parking").default(false),
+  hasWifi: boolean("has_wifi").default(false),
+  hasOutdoorSeating: boolean("has_outdoor_seating").default(false),
+  hasLiveMusic: boolean("has_live_music").default(false),
+  themeColor: text("theme_color"), // hex color for vizitka
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });

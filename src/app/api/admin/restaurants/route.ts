@@ -19,6 +19,7 @@ export async function GET() {
       cuisineType: restaurants.cuisineType,
       isActive: restaurants.isActive,
       isPremium: restaurants.isPremium,
+      plan: restaurants.plan,
       createdAt: restaurants.createdAt,
       ownerName: users.name,
       ownerEmail: users.email,
@@ -37,11 +38,12 @@ export async function PATCH(request: NextRequest) {
   }
 
   try {
-    const { id, isActive, isPremium } = await request.json();
+    const { id, isActive, isPremium, plan } = await request.json();
 
     const updates: Record<string, unknown> = { updatedAt: new Date() };
     if (typeof isActive === "boolean") updates.isActive = isActive;
     if (typeof isPremium === "boolean") updates.isPremium = isPremium;
+    if (plan) updates.plan = plan;
 
     const [updated] = await db
       .update(restaurants)
