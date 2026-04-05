@@ -14,7 +14,7 @@ import {
   Shield,
   Search,
   Heart,
-  Tag,
+  ChefHat,
   CalendarDays,
   Sun,
   Moon,
@@ -70,7 +70,7 @@ export function Navbar() {
     { href: "/restaurace", label: "Restaurace", icon: Search },
     { href: "/dnes", label: "Denní menu", icon: CalendarDays },
     { href: "/oblibene", label: "Oblíbené", icon: Heart },
-    { href: "/cenik", label: "Ceník", icon: Tag },
+    { href: "/pro-restaurace", label: "Pro restaurace", icon: ChefHat },
   ];
 
   return (

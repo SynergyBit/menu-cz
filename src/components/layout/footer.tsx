@@ -31,8 +31,9 @@ export function Footer() {
           <div>
             <h3 className="mb-3 text-sm font-semibold">Pro restaurace</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/registrace" className="hover:text-foreground transition-colors">Registrace restaurace</Link></li>
+              <li><Link href="/pro-restaurace" className="hover:text-foreground transition-colors">Proč MenuCZ</Link></li>
               <li><Link href="/cenik" className="hover:text-foreground transition-colors">Ceník</Link></li>
+              <li><Link href="/registrace" className="hover:text-foreground transition-colors">Registrace</Link></li>
               <li><Link href="/prihlaseni" className="hover:text-foreground transition-colors">Přihlášení</Link></li>
             </ul>
           </div>
@@ -40,6 +41,7 @@ export function Footer() {
           <div>
             <h3 className="mb-3 text-sm font-semibold">Pro hosty</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
+              <li><Link href="/dnes" className="hover:text-foreground transition-colors">Denní menu dnes</Link></li>
               <li><Link href="/registrace-host" className="hover:text-foreground transition-colors">Vytvořit účet</Link></li>
               <li><Link href="/oblibene" className="hover:text-foreground transition-colors">Oblíbené</Link></li>
             </ul>

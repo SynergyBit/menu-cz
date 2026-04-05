@@ -431,15 +431,15 @@ export default function HomePage() {
                 </p>
               </div>
               <div className="flex gap-3">
-                <Link href="/registrace">
+                <Link href="/pro-restaurace">
                   <Button size="lg" variant="secondary" className="gap-2 shadow-lg">
-                    Zaregistrovat restauraci
+                    Zjistit více
                     <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
-                <Link href="/restaurace">
+                <Link href="/registrace">
                   <Button size="lg" variant="ghost" className="gap-2 text-primary-foreground hover:bg-white/10 hover:text-primary-foreground">
-                    Prohlédnout restaurace
+                    Zaregistrovat restauraci
                   </Button>
                 </Link>
               </div>
