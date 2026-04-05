@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Save, Loader2, Check, Clock } from "lucide-react";
 
@@ -68,14 +69,23 @@ export default function HoursPage() {
   async function handleSave() {
     setSaving(true);
     setSaved(false);
-    await fetch("/api/restaurants/me/hours", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ hours }),
-    });
+    try {
+      const res = await fetch("/api/restaurants/me/hours", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hours }),
+      });
+      if (res.ok) {
+        setSaved(true);
+        toast.success("Otevírací doba uložena");
+        setTimeout(() => setSaved(false), 2000);
+      } else {
+        toast.error("Chyba při ukládání");
+      }
+    } catch {
+      toast.error("Chyba připojení");
+    }
     setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
   }
 
   function updateHour(day: number, field: keyof HourEntry, value: string | boolean) {

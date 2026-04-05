@@ -212,6 +212,7 @@ export default function RestaurantDetailPage({
     totalReviews: number;
   }>({ reviews: [], avgRating: 0, totalReviews: 0 });
   const [reviewForm, setReviewForm] = useState({ authorName: "", rating: 0, comment: "" });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
@@ -219,6 +220,17 @@ export default function RestaurantDetailPage({
     fetch(`/api/restaurants/${slug}/reviews`)
       .then((res) => res.json())
       .then(setReviewsData)
+      .catch(() => {});
+
+    // Pre-fill name for logged-in users
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.user) {
+          setIsLoggedIn(true);
+          setReviewForm((f) => ({ ...f, authorName: data.user.name }));
+        }
+      })
       .catch(() => {});
   }, [slug]);
 

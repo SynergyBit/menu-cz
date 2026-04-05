@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { StarRating } from "@/components/star-rating";
+import { toast } from "sonner";
 import { FavoriteButton } from "@/components/favorite-button";
 import {
   User,
@@ -198,6 +199,10 @@ export default function AccountPage() {
             <Settings className="h-3.5 w-3.5" />
             Preference
           </TabsTrigger>
+          <TabsTrigger value="settings" className="gap-1.5">
+            <User className="h-3.5 w-3.5" />
+            Nastavení
+          </TabsTrigger>
         </TabsList>
 
         {/* Favorites */}
@@ -334,7 +339,145 @@ export default function AccountPage() {
             </Button>
           </div>
         </TabsContent>
+
+        {/* Settings - account */}
+        <TabsContent value="settings" className="mt-6 space-y-6">
+          <AccountSettings user={user} onNameChange={(name) => setUser((u) => u ? { ...u, name } : u)} />
+        </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+function AccountSettings({
+  user,
+  onNameChange,
+}: {
+  user: { id: string; name: string; email: string };
+  onNameChange: (name: string) => void;
+}) {
+  const [name, setName] = useState(user.name);
+  const [savingName, setSavingName] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [savingPw, setSavingPw] = useState(false);
+
+  async function handleNameSave() {
+    if (!name.trim()) return;
+    setSavingName(true);
+    try {
+      const res = await fetch("/api/auth/me/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim() }),
+      });
+      if (res.ok) {
+        toast.success("Jméno změněno");
+        onNameChange(name.trim());
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Chyba");
+      }
+    } catch {
+      toast.error("Chyba připojení");
+    } finally {
+      setSavingName(false);
+    }
+  }
+
+  async function handlePasswordChange(e: React.FormEvent) {
+    e.preventDefault();
+    if (!currentPassword || !newPassword) return;
+    setSavingPw(true);
+    try {
+      const res = await fetch("/api/auth/me/password", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      if (res.ok) {
+        toast.success("Heslo změněno");
+        setCurrentPassword("");
+        setNewPassword("");
+      } else {
+        const data = await res.json();
+        toast.error(data.error || "Chyba");
+      }
+    } catch {
+      toast.error("Chyba připojení");
+    } finally {
+      setSavingPw(false);
+    }
+  }
+
+  return (
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Osobní údaje</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="acc-name">Jméno</Label>
+            <div className="flex gap-2">
+              <Input
+                id="acc-name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <Button
+                onClick={handleNameSave}
+                disabled={savingName || name.trim() === user.name}
+                className="shrink-0 gap-2"
+              >
+                {savingName ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                Uložit
+              </Button>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>Email</Label>
+            <Input value={user.email} disabled className="bg-muted" />
+            <p className="text-xs text-muted-foreground">Email nelze změnit</p>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Změna hesla</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handlePasswordChange} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="current-pw">Aktuální heslo</Label>
+              <Input
+                id="current-pw"
+                type="password"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="new-pw">Nové heslo</Label>
+              <Input
+                id="new-pw"
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Alespoň 6 znaků"
+                minLength={6}
+                required
+              />
+            </div>
+            <Button type="submit" disabled={savingPw} className="gap-2">
+              {savingPw ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              Změnit heslo
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </>
   );
 }

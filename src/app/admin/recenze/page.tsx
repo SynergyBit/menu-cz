@@ -8,9 +8,21 @@ import { Switch } from "@/components/ui/switch";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StarRating } from "@/components/star-rating";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
 import { Trash2, Star } from "lucide-react";
+import { toast } from "sonner";
 
 interface Review {
   id: string;
@@ -46,8 +58,8 @@ export default function AdminRecenzePage() {
   }
 
   async function deleteReview(id: string) {
-    if (!confirm("Smazat recenzi?")) return;
     await fetch(`/api/admin/reviews?id=${id}`, { method: "DELETE" });
+    toast.success("Recenze smazána");
     loadReviews();
   }
 
@@ -98,14 +110,27 @@ export default function AdminRecenzePage() {
                       />
                     </TableCell>
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-destructive hover:text-destructive"
-                        onClick={() => deleteReview(r.id)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger render={
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" />
+                        }>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Smazat recenzi?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              Recenze od {r.authorName} bude trvale smazána.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Zrušit</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deleteReview(r.id)}>
+                              Smazat
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </TableCell>
                   </TableRow>
                 ))}

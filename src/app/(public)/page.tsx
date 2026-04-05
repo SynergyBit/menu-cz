@@ -111,6 +111,15 @@ function AnimatedCounter({ end, label }: { end: number; label: string }) {
 }
 
 export default function HomePage() {
+  const [stats, setStats] = useState({ restaurants: 0, menuItems: 0, reviews: 0, users: 0 });
+
+  useEffect(() => {
+    fetch("/api/stats")
+      .then((r) => r.json())
+      .then(setStats)
+      .catch(() => {});
+  }, []);
+
   return (
     <div>
       {/* Hero */}
@@ -204,10 +213,10 @@ export default function HomePage() {
       <section className="border-t border-b bg-card py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
-            <AnimatedCounter end={50} label="Restaurací" />
-            <AnimatedCounter end={500} label="Položek v menu" />
-            <AnimatedCounter end={100} label="Denních menu" />
-            <AnimatedCounter end={1000} label="Spokojených hostů" />
+            <AnimatedCounter end={stats.restaurants || 0} label="Restaurací" />
+            <AnimatedCounter end={stats.menuItems || 0} label="Položek v menu" />
+            <AnimatedCounter end={stats.reviews || 0} label="Recenzí" />
+            <AnimatedCounter end={stats.users || 0} label="Registrovaných hostů" />
           </div>
         </div>
       </section>
