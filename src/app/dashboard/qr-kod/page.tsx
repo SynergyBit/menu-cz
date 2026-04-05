@@ -65,7 +65,7 @@ export default function QRKodPage() {
   }
 
   function copyLink() {
-    const url = `${window.location.origin}/restaurace/${restaurant?.slug}`;
+    const url = `${window.location.origin}/m/${restaurant?.slug}`;
     navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -80,7 +80,7 @@ export default function QRKodPage() {
     );
   }
 
-  const menuUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/restaurace/${restaurant?.slug}`;
+  const menuUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/m/${restaurant?.slug}`;
 
   return (
     <div className="max-w-2xl space-y-6">
@@ -188,7 +188,7 @@ export default function QRKodPage() {
 
           {restaurant?.isActive && (
             <a
-              href={`/restaurace/${restaurant.slug}`}
+              href={`/m/${restaurant.slug}`}
               target="_blank"
               rel="noopener noreferrer"
             >

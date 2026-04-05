@@ -13,6 +13,8 @@ import {
   LogOut,
   Shield,
   Search,
+  Heart,
+  Tag,
   Sun,
   Moon,
   User,
@@ -65,8 +67,8 @@ export function Navbar() {
 
   const navLinks = [
     { href: "/restaurace", label: "Restaurace", icon: Search },
-    { href: "/oblibene", label: "Oblíbené", icon: Search },
-    { href: "/cenik", label: "Ceník", icon: Search },
+    { href: "/oblibene", label: "Oblíbené", icon: Heart },
+    { href: "/cenik", label: "Ceník", icon: Tag },
   ];
 
   return (

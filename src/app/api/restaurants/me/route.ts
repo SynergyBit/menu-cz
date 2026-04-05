@@ -13,7 +13,10 @@ export async function PUT(request: NextRequest) {
 
   try {
     const body = await request.json();
-    const { name, description, address, city, phone, email, website, cuisineType, priceRange } = body;
+    const {
+      name, description, address, city, phone, email, website, cuisineType, priceRange,
+      tagline, acceptsReservations, hasDelivery, hasTakeaway, hasParking, hasWifi, hasOutdoorSeating, hasLiveMusic,
+    } = body;
 
     // Geocode if address or city changed
     let latitude: number | null = null;
@@ -37,6 +40,14 @@ export async function PUT(request: NextRequest) {
       website,
       cuisineType,
       priceRange: priceRange ? Number(priceRange) : undefined,
+      tagline: tagline || null,
+      acceptsReservations: !!acceptsReservations,
+      hasDelivery: !!hasDelivery,
+      hasTakeaway: !!hasTakeaway,
+      hasParking: !!hasParking,
+      hasWifi: !!hasWifi,
+      hasOutdoorSeating: !!hasOutdoorSeating,
+      hasLiveMusic: !!hasLiveMusic,
       updatedAt: new Date(),
     };
 

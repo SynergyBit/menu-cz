@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PremiumGate, PlanBadge } from "@/components/premium-gate";
+import { toast } from "sonner";
 import {
   ImagePlus,
   Trash2,
@@ -56,10 +57,10 @@ export default function FotkyPage() {
         loadPhotos();
       } else {
         const data = await res.json();
-        alert(data.error || "Chyba");
+        toast.error(data.error || "Chyba");
       }
     } catch {
-      alert("Chyba při nahrávání");
+      toast.error("Chyba při nahrávání");
     } finally {
       setUploading(false);
       if (inputRef.current) inputRef.current.value = "";

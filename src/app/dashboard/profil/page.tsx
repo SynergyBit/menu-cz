@@ -15,8 +15,21 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { Switch } from "@/components/ui/switch";
 import { ImageUpload } from "@/components/image-upload";
-import { Save, Loader2, Check } from "lucide-react";
+import { toast } from "sonner";
+import {
+  Save,
+  Loader2,
+  Check,
+  CalendarCheck,
+  Truck,
+  ShoppingBag,
+  Car,
+  Wifi,
+  TreePine,
+  Music,
+} from "lucide-react";
 
 const cuisineOptions = [
   "Česká",
@@ -34,7 +47,7 @@ const cuisineOptions = [
 ];
 
 export default function ProfilPage() {
-  const [restaurant, setRestaurant] = useState<Record<string, string | number | null>>({});
+  const [restaurant, setRestaurant] = useState<Record<string, string | number | boolean | null>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -64,9 +77,13 @@ export default function ProfilPage() {
         const data = await res.json();
         setRestaurant(data.restaurant);
         setSaved(true);
+        toast.success("Profil uložen");
         setTimeout(() => setSaved(false), 2000);
+      } else {
+        toast.error("Chyba při ukládání");
       }
     } catch {
+      toast.error("Chyba připojení");
     } finally {
       setSaving(false);
     }
@@ -249,6 +266,52 @@ export default function ProfilPage() {
                     <SelectItem value="4">$$$$ — Luxusní</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+
+            <Separator className="my-4" />
+
+            <div className="space-y-2">
+              <Label htmlFor="tagline">Slogan</Label>
+              <Input
+                id="tagline"
+                value={(restaurant.tagline as string) || ""}
+                onChange={(e) =>
+                  setRestaurant((r) => ({ ...r, tagline: e.target.value }))
+                }
+                placeholder="Tradiční česká kuchyně od roku 1995"
+                maxLength={100}
+              />
+              <p className="text-xs text-muted-foreground">Krátký slogan zobrazený pod názvem</p>
+            </div>
+
+            <Separator className="my-4" />
+
+            <div>
+              <Label className="mb-3 block">Služby a vybavení</Label>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[
+                  { key: "acceptsReservations", icon: CalendarCheck, label: "Rezervace" },
+                  { key: "hasDelivery", icon: Truck, label: "Rozvoz" },
+                  { key: "hasTakeaway", icon: ShoppingBag, label: "S sebou" },
+                  { key: "hasParking", icon: Car, label: "Parkování" },
+                  { key: "hasWifi", icon: Wifi, label: "WiFi" },
+                  { key: "hasOutdoorSeating", icon: TreePine, label: "Zahrádka" },
+                  { key: "hasLiveMusic", icon: Music, label: "Živá hudba" },
+                ].map((a) => (
+                  <div key={a.key} className="flex items-center justify-between rounded-lg border p-3">
+                    <div className="flex items-center gap-2">
+                      <a.icon className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm">{a.label}</span>
+                    </div>
+                    <Switch
+                      checked={!!(restaurant[a.key])}
+                      onCheckedChange={(v) =>
+                        setRestaurant((r) => ({ ...r, [a.key]: v }))
+                      }
+                    />
+                  </div>
+                ))}
               </div>
             </div>
 

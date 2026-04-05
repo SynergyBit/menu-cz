@@ -39,20 +39,50 @@ export default function OblibenePage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const favIds = getFavorites();
-    if (favIds.length === 0) {
-      setLoading(false);
-      return;
-    }
-
-    fetch("/api/restaurants")
+    // Try server-side favorites first (logged in), fallback to localStorage
+    fetch("/api/favorites")
       .then((r) => r.json())
       .then((data) => {
-        const all = data.restaurants || [];
-        setRestaurants(all.filter((r: Restaurant) => favIds.includes(r.id)));
+        if (data.favorites && data.favorites.length > 0) {
+          // Server-side: already have restaurant data
+          setRestaurants(data.favorites.map((f: { restaurant: Restaurant }) => f.restaurant));
+          setLoading(false);
+        } else if (data.favoriteIds && data.favoriteIds.length > 0) {
+          // Server returned empty favorites for logged-in user
+          setLoading(false);
+        } else {
+          // Fallback to localStorage
+          const favIds = getFavorites();
+          if (favIds.length === 0) {
+            setLoading(false);
+            return;
+          }
+          fetch("/api/restaurants")
+            .then((r) => r.json())
+            .then((rData) => {
+              const all = rData.restaurants || [];
+              setRestaurants(all.filter((r: Restaurant) => favIds.includes(r.id)));
+            })
+            .catch(() => {})
+            .finally(() => setLoading(false));
+        }
       })
-      .catch(() => {})
-      .finally(() => setLoading(false));
+      .catch(() => {
+        // Not logged in — use localStorage
+        const favIds = getFavorites();
+        if (favIds.length === 0) {
+          setLoading(false);
+          return;
+        }
+        fetch("/api/restaurants")
+          .then((r) => r.json())
+          .then((data) => {
+            const all = data.restaurants || [];
+            setRestaurants(all.filter((r: Restaurant) => favIds.includes(r.id)));
+          })
+          .catch(() => {})
+          .finally(() => setLoading(false));
+      });
   }, []);
 
   return (

@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   CalendarDays,
@@ -155,7 +156,7 @@ export default function DailyMenuPage() {
                   loadMenu();
                 } else {
                   const data = await res.json();
-                  alert(data.error || "Chyba");
+                  toast.error(data.error || "Chyba");
                   setLoading(false);
                 }
               }}>
