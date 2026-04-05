@@ -23,13 +23,7 @@ import {
   X,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// Select removed — using visual chip filters instead
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
@@ -61,6 +55,12 @@ interface Restaurant {
   longitude: number | null;
   avgRating: number;
   reviewCount: number;
+  acceptsReservations: boolean;
+  hasDelivery: boolean;
+  hasTakeaway: boolean;
+  hasParking: boolean;
+  hasWifi: boolean;
+  hasOutdoorSeating: boolean;
 }
 
 const priceLabels: Record<number, string> = {
@@ -98,7 +98,44 @@ export default function RestauracePage() {
   );
 }
 
-const cuisineOptions = ["Česká", "Italská", "Asijská", "Mexická", "Indická", "Francouzská", "Vegetariánská", "Veganská", "Mezinárodní", "Fast food", "Kavárna"];
+const cuisineOptions = [
+  { label: "Česká", emoji: "🇨🇿" },
+  { label: "Italská", emoji: "🇮🇹" },
+  { label: "Asijská", emoji: "🥢" },
+  { label: "Mexická", emoji: "🇲🇽" },
+  { label: "Indická", emoji: "🇮🇳" },
+  { label: "Francouzská", emoji: "🇫🇷" },
+  { label: "Ukrajinská", emoji: "🇺🇦" },
+  { label: "Řecká", emoji: "🇬🇷" },
+  { label: "Turecká", emoji: "🇹🇷" },
+  { label: "Thajská", emoji: "🇹🇭" },
+  { label: "Japonská", emoji: "🇯🇵" },
+  { label: "Korejská", emoji: "🇰🇷" },
+  { label: "Vietnamská", emoji: "🇻🇳" },
+  { label: "Americká", emoji: "🇺🇸" },
+  { label: "Mezinárodní", emoji: "🌍" },
+  { label: "Fast food", emoji: "🍔" },
+  { label: "Kavárna", emoji: "☕" },
+  { label: "Cukrárna", emoji: "🍰" },
+];
+
+const dietaryOptions = [
+  { label: "Vegetariánská", emoji: "🥬" },
+  { label: "Veganská", emoji: "🌱" },
+  { label: "Bezlepková", emoji: "🌾" },
+  { label: "Bezlaktózová", emoji: "🥛" },
+  { label: "Keto", emoji: "🥑" },
+  { label: "Pescatariánská", emoji: "🐟" },
+];
+
+const amenityFilters = [
+  { key: "hasDelivery", label: "Rozvoz", emoji: "🚗" },
+  { key: "hasTakeaway", label: "S sebou", emoji: "📦" },
+  { key: "acceptsReservations", label: "Rezervace", emoji: "📞" },
+  { key: "hasOutdoorSeating", label: "Zahrádka", emoji: "☀️" },
+  { key: "hasWifi", label: "WiFi", emoji: "📶" },
+  { key: "hasParking", label: "Parkování", emoji: "🅿️" },
+];
 
 function RestauraceContent() {
   const searchParams = useSearchParams();
@@ -110,15 +147,24 @@ function RestauraceContent() {
 
   // Filters
   const [cuisine, setCuisine] = useState(searchParams.get("cuisine") || "");
+  const [dietary, setDietary] = useState("");
   const [city, setCity] = useState("");
   const [priceRange, setPriceRange] = useState("");
   const [onlyOpen, setOnlyOpen] = useState(false);
   const [onlyDailyMenu, setOnlyDailyMenu] = useState(false);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+
+  function toggleAmenity(key: string) {
+    setSelectedAmenities((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
+  }
 
   function buildParams() {
     const params = new URLSearchParams();
     if (query.trim()) params.set("q", query.trim());
     if (cuisine) params.set("cuisine", cuisine);
+    if (dietary) params.set("cuisine", dietary); // dietary uses same field
     if (city) params.set("city", city);
     if (priceRange) params.set("price", priceRange);
     if (onlyOpen) params.set("open", "1");
@@ -162,10 +208,12 @@ function RestauraceContent() {
 
   function clearFilters() {
     setCuisine("");
+    setDietary("");
     setCity("");
     setPriceRange("");
     setOnlyOpen(false);
     setOnlyDailyMenu(false);
+    setSelectedAmenities([]);
     const params = new URLSearchParams();
     if (query.trim()) params.set("q", query.trim());
     window.history.pushState({}, "", `/restaurace?${params}`);
@@ -173,13 +221,17 @@ function RestauraceContent() {
     setFilterOpen(false);
   }
 
-  const activeFilterCount = [cuisine, city, priceRange, onlyOpen, onlyDailyMenu].filter(Boolean).length;
+  const activeFilterCount = [cuisine, dietary, city, priceRange, onlyOpen, onlyDailyMenu, ...selectedAmenities].filter(Boolean).length;
 
-  // Client-side filtering for open/daily (API already returns the data)
+  // Client-side filtering
   let filtered = restaurants;
   if (onlyOpen) filtered = filtered.filter((r) => r.isOpenNow);
   if (onlyDailyMenu) filtered = filtered.filter((r) => r.hasDailyMenu);
   if (priceRange) filtered = filtered.filter((r) => r.priceRange === Number(priceRange));
+  // Amenity filtering (client-side since we have the data)
+  for (const amenity of selectedAmenities) {
+    filtered = filtered.filter((r) => (r as unknown as Record<string, unknown>)[amenity]);
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
@@ -218,77 +270,159 @@ function RestauraceContent() {
               </Badge>
             )}
           </SheetTrigger>
-          <SheetContent side="right" className="w-80">
+          <SheetContent side="right" className="w-[340px] sm:w-[380px] overflow-y-auto">
             <div className="flex flex-col h-full pt-6">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold">Filtry</h3>
                 {activeFilterCount > 0 && (
-                  <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-1.5 text-xs">
+                  <Button variant="ghost" size="sm" onClick={clearFilters} className="gap-1.5 text-xs text-destructive hover:text-destructive">
                     <X className="h-3 w-3" />
-                    Vymazat
+                    Vymazat vše ({activeFilterCount})
                   </Button>
                 )}
               </div>
-              <div className="flex-1 space-y-6">
-                <div className="space-y-2">
-                  <Label>Typ kuchyně</Label>
-                  <Select value={cuisine} onValueChange={(v) => setCuisine(v || "")}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Všechny kuchyně" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {cuisineOptions.map((c) => (
-                        <SelectItem key={c} value={c.toLowerCase()}>{c}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
 
-                <div className="space-y-2">
-                  <Label>Město</Label>
-                  <Input
-                    value={city}
-                    onChange={(e) => setCity(e.target.value)}
-                    placeholder="Např. Praha"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Cenová úroveň</Label>
-                  <Select value={priceRange} onValueChange={(v) => setPriceRange(v || "")}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Jakákoliv" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="1">$ — Levné</SelectItem>
-                      <SelectItem value="2">$$ — Střední</SelectItem>
-                      <SelectItem value="3">$$$ — Dražší</SelectItem>
-                      <SelectItem value="4">$$$$ — Luxusní</SelectItem>
-                    </SelectContent>
-                  </Select>
+              <div className="flex-1 space-y-6 overflow-y-auto pb-4">
+                {/* Quick toggles */}
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => setOnlyOpen(!onlyOpen)}
+                    className={`flex items-center gap-2 rounded-xl border-2 px-3 py-2.5 text-sm font-medium transition-all ${
+                      onlyOpen
+                        ? "border-green-500 bg-green-500/10 text-green-700 dark:text-green-400"
+                        : "border-border hover:border-green-500/50"
+                    }`}
+                  >
+                    <Clock className="h-4 w-4" />
+                    Otevřeno teď
+                  </button>
+                  <button
+                    onClick={() => setOnlyDailyMenu(!onlyDailyMenu)}
+                    className={`flex items-center gap-2 rounded-xl border-2 px-3 py-2.5 text-sm font-medium transition-all ${
+                      onlyDailyMenu
+                        ? "border-primary bg-primary/10 text-primary"
+                        : "border-border hover:border-primary/50"
+                    }`}
+                  >
+                    <CalendarDays className="h-4 w-4" />
+                    Denní menu
+                  </button>
                 </div>
 
                 <Separator />
 
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="onlyOpen" className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-green-600" />
-                    Otevřeno teď
-                  </Label>
-                  <Switch id="onlyOpen" checked={onlyOpen} onCheckedChange={setOnlyOpen} />
+                {/* Cuisine type */}
+                <div>
+                  <Label className="mb-2.5 block text-sm font-semibold">Typ kuchyně</Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {cuisineOptions.map((c) => (
+                      <button
+                        key={c.label}
+                        onClick={() => setCuisine(cuisine === c.label.toLowerCase() ? "" : c.label.toLowerCase())}
+                        className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                          cuisine === c.label.toLowerCase()
+                            ? "bg-primary text-primary-foreground shadow-sm"
+                            : "bg-muted hover:bg-muted/80 text-foreground"
+                        }`}
+                      >
+                        <span>{c.emoji}</span>
+                        {c.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="onlyDaily" className="flex items-center gap-2">
-                    <CalendarDays className="h-4 w-4 text-primary" />
-                    Má denní menu
-                  </Label>
-                  <Switch id="onlyDaily" checked={onlyDailyMenu} onCheckedChange={setOnlyDailyMenu} />
+                <Separator />
+
+                {/* Dietary */}
+                <div>
+                  <Label className="mb-2.5 block text-sm font-semibold">Stravování</Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {dietaryOptions.map((d) => (
+                      <button
+                        key={d.label}
+                        onClick={() => setDietary(dietary === d.label.toLowerCase() ? "" : d.label.toLowerCase())}
+                        className={`inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                          dietary === d.label.toLowerCase()
+                            ? "bg-green-600 text-white shadow-sm"
+                            : "bg-muted hover:bg-muted/80 text-foreground"
+                        }`}
+                      >
+                        <span>{d.emoji}</span>
+                        {d.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Price range */}
+                <div>
+                  <Label className="mb-2.5 block text-sm font-semibold">Cenová úroveň</Label>
+                  <div className="grid grid-cols-4 gap-2">
+                    {[
+                      { value: "1", label: "$", desc: "Levné" },
+                      { value: "2", label: "$$", desc: "Střední" },
+                      { value: "3", label: "$$$", desc: "Dražší" },
+                      { value: "4", label: "$$$$", desc: "Luxus" },
+                    ].map((p) => (
+                      <button
+                        key={p.value}
+                        onClick={() => setPriceRange(priceRange === p.value ? "" : p.value)}
+                        className={`flex flex-col items-center rounded-xl border-2 py-2.5 text-sm transition-all ${
+                          priceRange === p.value
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border hover:border-primary/50"
+                        }`}
+                      >
+                        <span className="font-bold">{p.label}</span>
+                        <span className="text-[10px] text-muted-foreground">{p.desc}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* Amenities */}
+                <div>
+                  <Label className="mb-2.5 block text-sm font-semibold">Služby</Label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {amenityFilters.map((a) => (
+                      <button
+                        key={a.key}
+                        onClick={() => toggleAmenity(a.key)}
+                        className={`flex items-center gap-2 rounded-xl border-2 px-3 py-2 text-xs font-medium transition-all ${
+                          selectedAmenities.includes(a.key)
+                            ? "border-primary bg-primary/10 text-primary"
+                            : "border-border hover:border-primary/50"
+                        }`}
+                      >
+                        <span className="text-sm">{a.emoji}</span>
+                        {a.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <Separator />
+
+                {/* City */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-semibold">Město</Label>
+                  <Input
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="Např. Praha, Brno..."
+                    className="h-10"
+                  />
                 </div>
               </div>
 
+              {/* Bottom action */}
               <div className="pt-4 border-t space-y-2">
-                <Button onClick={applyFilters} className="w-full">
+                <Button onClick={applyFilters} className="w-full h-11 text-sm font-semibold">
                   Zobrazit výsledky
                 </Button>
               </div>
@@ -317,39 +451,67 @@ function RestauraceContent() {
 
       {/* Active filter chips */}
       {activeFilterCount > 0 && (
-        <div className="mb-4 flex flex-wrap gap-2">
+        <div className="mb-4 flex flex-wrap items-center gap-2">
+          <span className="text-xs text-muted-foreground">Filtry:</span>
           {cuisine && (
-            <Badge variant="secondary" className="gap-1.5">
-              {cuisine}
-              <button onClick={() => { setCuisine(""); applyFilters(); }}>
+            <Badge variant="secondary" className="gap-1.5 pr-1.5">
+              {cuisineOptions.find((c) => c.label.toLowerCase() === cuisine)?.emoji} {cuisine}
+              <button onClick={() => { setCuisine(""); applyFilters(); }} className="ml-0.5 rounded-full p-0.5 hover:bg-destructive/20">
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )}
+          {dietary && (
+            <Badge variant="secondary" className="gap-1.5 pr-1.5 bg-green-500/10 text-green-700 dark:text-green-400">
+              {dietaryOptions.find((d) => d.label.toLowerCase() === dietary)?.emoji} {dietary}
+              <button onClick={() => { setDietary(""); applyFilters(); }} className="ml-0.5 rounded-full p-0.5 hover:bg-destructive/20">
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          )}
+          {priceRange && (
+            <Badge variant="secondary" className="gap-1 pr-1.5">
+              {"$".repeat(Number(priceRange))}
+              <button onClick={() => { setPriceRange(""); applyFilters(); }} className="ml-0.5 rounded-full p-0.5 hover:bg-destructive/20">
                 <X className="h-3 w-3" />
               </button>
             </Badge>
           )}
           {city && (
-            <Badge variant="secondary" className="gap-1.5">
+            <Badge variant="secondary" className="gap-1.5 pr-1.5">
               <MapPin className="h-3 w-3" />{city}
-              <button onClick={() => { setCity(""); applyFilters(); }}>
+              <button onClick={() => { setCity(""); applyFilters(); }} className="ml-0.5 rounded-full p-0.5 hover:bg-destructive/20">
                 <X className="h-3 w-3" />
               </button>
             </Badge>
           )}
           {onlyOpen && (
-            <Badge variant="secondary" className="gap-1.5">
+            <Badge variant="secondary" className="gap-1.5 pr-1.5 bg-green-500/10 text-green-700 dark:text-green-400">
               <Clock className="h-3 w-3" />Otevřeno
-              <button onClick={() => { setOnlyOpen(false); applyFilters(); }}>
+              <button onClick={() => { setOnlyOpen(false); applyFilters(); }} className="ml-0.5 rounded-full p-0.5 hover:bg-destructive/20">
                 <X className="h-3 w-3" />
               </button>
             </Badge>
           )}
           {onlyDailyMenu && (
-            <Badge variant="secondary" className="gap-1.5">
+            <Badge variant="secondary" className="gap-1.5 pr-1.5">
               <CalendarDays className="h-3 w-3" />Denní menu
-              <button onClick={() => { setOnlyDailyMenu(false); applyFilters(); }}>
+              <button onClick={() => { setOnlyDailyMenu(false); applyFilters(); }} className="ml-0.5 rounded-full p-0.5 hover:bg-destructive/20">
                 <X className="h-3 w-3" />
               </button>
             </Badge>
           )}
+          {selectedAmenities.map((key) => {
+            const amenity = amenityFilters.find((a) => a.key === key);
+            return amenity ? (
+              <Badge key={key} variant="secondary" className="gap-1.5 pr-1.5">
+                {amenity.emoji} {amenity.label}
+                <button onClick={() => { toggleAmenity(key); applyFilters(); }} className="ml-0.5 rounded-full p-0.5 hover:bg-destructive/20">
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ) : null;
+          })}
         </div>
       )}
 
