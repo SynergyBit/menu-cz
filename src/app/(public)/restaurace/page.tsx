@@ -21,7 +21,11 @@ import {
   Map,
   SlidersHorizontal,
   X,
+  Navigation,
+  Loader2,
 } from "lucide-react";
+import { useGeolocation } from "@/hooks/use-geolocation";
+import { getDistance, formatDistance } from "@/lib/geo";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 // Select removed — using visual chip filters instead
 import { Switch } from "@/components/ui/switch";
@@ -144,6 +148,8 @@ function RestauraceContent() {
   const [query, setQuery] = useState(searchParams.get("q") || "");
   const [view, setView] = useState<"list" | "map">("list");
   const [filterOpen, setFilterOpen] = useState(false);
+  const [sortByDistance, setSortByDistance] = useState(false);
+  const geo = useGeolocation();
 
   // Filters
   const [cuisine, setCuisine] = useState(searchParams.get("cuisine") || "");
@@ -228,18 +234,42 @@ function RestauraceContent() {
   if (onlyOpen) filtered = filtered.filter((r) => r.isOpenNow);
   if (onlyDailyMenu) filtered = filtered.filter((r) => r.hasDailyMenu);
   if (priceRange) filtered = filtered.filter((r) => r.priceRange === Number(priceRange));
-  // Amenity filtering (client-side since we have the data)
   for (const amenity of selectedAmenities) {
     filtered = filtered.filter((r) => (r as unknown as Record<string, unknown>)[amenity]);
   }
+
+  // Calculate distance and sort
+  const withDistance = filtered.map((r) => {
+    let distance: number | null = null;
+    if (geo.position && r.latitude && r.longitude) {
+      distance = getDistance(
+        geo.position.latitude,
+        geo.position.longitude,
+        r.latitude,
+        r.longitude
+      );
+    }
+    return { ...r, distance };
+  });
+
+  if (sortByDistance && geo.position) {
+    withDistance.sort((a, b) => {
+      if (a.distance === null && b.distance === null) return 0;
+      if (a.distance === null) return 1;
+      if (b.distance === null) return 1;
+      return a.distance - b.distance;
+    });
+  }
+
+  const finalList = withDistance;
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">Restaurace</h1>
         <p className="mt-2 text-muted-foreground">
-          {!loading && filtered.length > 0
-            ? `${filtered.length} ${filtered.length === 1 ? "restaurace" : filtered.length < 5 ? "restaurace" : "restaurací"}`
+          {!loading && finalList.length > 0
+            ? `${finalList.length} ${finalList.length === 1 ? "restaurace" : finalList.length < 5 ? "restaurace" : "restaurací"}`
             : "Najděte restauraci a prohlédněte si její menu"}
         </p>
       </div>
@@ -260,6 +290,27 @@ function RestauraceContent() {
             Hledat
           </Button>
         </form>
+        {/* Geolocation button */}
+        <Button
+          variant={sortByDistance && geo.position ? "default" : "outline"}
+          className="h-11 gap-2 shrink-0"
+          onClick={() => {
+            if (geo.position) {
+              setSortByDistance(!sortByDistance);
+            } else {
+              geo.requestPosition();
+              setSortByDistance(true);
+            }
+          }}
+          disabled={geo.loading}
+        >
+          {geo.loading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Navigation className="h-4 w-4" />
+          )}
+          <span className="hidden sm:inline">V okolí</span>
+        </Button>
         <Sheet open={filterOpen} onOpenChange={setFilterOpen}>
           <SheetTrigger render={<Button variant="outline" className="h-11 gap-2 shrink-0" />}>
             <SlidersHorizontal className="h-4 w-4" />
@@ -449,6 +500,29 @@ function RestauraceContent() {
         </div>
       </div>
 
+      {/* Geo error */}
+      {geo.error && (
+        <div className="mb-4 rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          {geo.error}
+        </div>
+      )}
+
+      {/* Sort by distance indicator */}
+      {sortByDistance && geo.position && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg bg-blue-500/10 px-3 py-2">
+          <Navigation className="h-4 w-4 text-blue-600" />
+          <span className="text-sm text-blue-700 dark:text-blue-400">
+            Seřazeno podle vzdálenosti od vaší polohy
+          </span>
+          <button
+            onClick={() => setSortByDistance(false)}
+            className="ml-auto text-blue-600 hover:text-blue-800"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+
       {/* Active filter chips */}
       {activeFilterCount > 0 && (
         <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -516,12 +590,13 @@ function RestauraceContent() {
       )}
 
       {/* Map view */}
-      {view === "map" && !loading && filtered.length > 0 && (
+      {view === "map" && !loading && finalList.length > 0 && (
         <div className="mb-6">
           <Suspense fallback={<Skeleton className="h-[450px] w-full rounded-xl" />}>
             <RestaurantMap
               className="h-[450px] w-full rounded-xl border"
-              markers={filtered
+              center={geo.position ? [geo.position.latitude, geo.position.longitude] as [number, number] : undefined}
+              markers={finalList
                 .filter((r) => r.latitude && r.longitude)
                 .map((r) => ({
                   lat: r.latitude!,
@@ -533,9 +608,9 @@ function RestauraceContent() {
                 }))}
             />
           </Suspense>
-          {filtered.filter((r) => !r.latitude || !r.longitude).length > 0 && (
+          {finalList.filter((r) => !r.latitude || !r.longitude).length > 0 && (
             <p className="mt-2 text-xs text-muted-foreground">
-              {filtered.filter((r) => !r.latitude || !r.longitude).length} restaurací bez zadané adresy se nezobrazuje na mapě
+              {finalList.filter((r) => !r.latitude || !r.longitude).length} restaurací bez zadané adresy se nezobrazuje na mapě
             </p>
           )}
         </div>
@@ -553,7 +628,7 @@ function RestauraceContent() {
             </Card>
           ))}
         </div>
-      ) : filtered.length === 0 ? (
+      ) : finalList.length === 0 ? (
         <Card className="py-16 text-center">
           <CardContent>
             <UtensilsCrossed className="mx-auto mb-4 h-12 w-12 text-muted-foreground/50" />
@@ -567,7 +642,7 @@ function RestauraceContent() {
         </Card>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((r) => (
+          {finalList.map((r) => (
             <Link key={r.id} href={`/restaurace/${r.slug}`}>
               <Card className="group h-full overflow-hidden transition-all hover:border-primary/30 hover:shadow-lg">
                 <div className="relative h-40 bg-gradient-to-br from-primary/10 to-warm/10">
@@ -650,6 +725,12 @@ function RestauraceContent() {
                       <Badge variant="outline" className="gap-1 text-xs">
                         <FileText className="h-3 w-3" />
                         {r.menuItemCount} položek
+                      </Badge>
+                    )}
+                    {r.distance !== null && r.distance !== undefined && (
+                      <Badge variant="outline" className="gap-1 text-xs border-blue-500/30 text-blue-600 dark:text-blue-400">
+                        <Navigation className="h-3 w-3" />
+                        {formatDistance(r.distance)}
                       </Badge>
                     )}
                   </div>
