@@ -24,7 +24,7 @@ export function Footer() {
             <h3 className="mb-3 text-sm font-semibold">Pro hosty</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link href="/restaurace" className="hover:text-foreground transition-colors">Najít restauraci</Link></li>
-              <li><Link href="/restaurace" className="hover:text-foreground transition-colors">Denní menu</Link></li>
+              <li><Link href="/dnes" className="hover:text-foreground transition-colors">Denní menu dnes</Link></li>
             </ul>
           </div>
 

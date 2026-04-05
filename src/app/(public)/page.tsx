@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { SearchBar } from "@/components/search-bar";
 import { FeaturedRestaurants } from "@/components/featured-restaurants";
+import { CityLinks } from "@/components/city-links";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -218,6 +219,14 @@ export default function HomePage() {
             <AnimatedCounter end={stats.reviews || 0} label="Recenzí" />
             <AnimatedCounter end={stats.users || 0} label="Registrovaných hostů" />
           </div>
+        </div>
+      </section>
+
+      {/* Cities */}
+      <section className="py-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <p className="mb-3 text-center text-sm text-muted-foreground">Restaurace podle města</p>
+          <CityLinks />
         </div>
       </section>
 

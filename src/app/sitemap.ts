@@ -8,6 +8,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
     { url: `${baseUrl}/restaurace`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
+    { url: `${baseUrl}/dnes`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
     { url: `${baseUrl}/cenik`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
     { url: `${baseUrl}/registrace`, changeFrequency: "monthly", priority: 0.6 },
     { url: `${baseUrl}/registrace-host`, changeFrequency: "monthly", priority: 0.5 },
@@ -30,7 +31,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.8,
     }));
 
-    return [...staticRoutes, ...restaurantUrls];
+    // City pages
+    const { sql, count } = await import("drizzle-orm");
+    const cities = await db
+      .select({ city: restaurants.city })
+      .from(restaurants)
+      .where(eq(restaurants.isActive, true))
+      .groupBy(restaurants.city);
+
+    const cityUrls = cities
+      .filter((c) => c.city)
+      .map((c) => ({
+        url: `${baseUrl}/restaurace/mesto/${c.city!.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-")}`,
+        changeFrequency: "daily" as const,
+        priority: 0.7,
+      }));
+
+    return [...staticRoutes, ...restaurantUrls, ...cityUrls];
   } catch {
     return staticRoutes;
   }
