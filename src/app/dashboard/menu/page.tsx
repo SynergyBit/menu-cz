@@ -33,6 +33,7 @@ import {
   Loader2,
   FolderPlus,
   UtensilsCrossed,
+  FileText,
 } from "lucide-react";
 
 interface MenuItem {
@@ -141,6 +142,19 @@ export default function MenuPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Jídelní lístek</h1>
+        {categories.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-1.5"
+            onClick={() => {
+              window.open("/api/restaurants/me/export-pdf", "_blank");
+            }}
+          >
+            <FileText className="h-3.5 w-3.5" />
+            Export PDF
+          </Button>
+        )}
       </div>
 
       {/* Add category */}
