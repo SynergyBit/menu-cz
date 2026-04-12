@@ -43,6 +43,7 @@ import {
   Loader2,
   CalendarDays,
   Sparkles,
+  Beer,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -173,6 +174,7 @@ export default function RestaurantDetailPage({
   }>({ reviews: [], avgRating: 0, totalReviews: 0 });
   const [reviewForm, setReviewForm] = useState({ authorName: "", rating: 0, comment: "" });
   const [activeDietaryFilters, setActiveDietaryFilters] = useState<string[]>([]);
+  const [activeHappyHour, setActiveHappyHour] = useState<{ title: string; discount: string | null; startTime: string; endTime: string; isActiveNow: boolean; minutesRemaining: number | null } | null>(null);
   const [restaurantEvents, setRestaurantEvents] = useState<{ id: string; title: string; eventDate: string; eventTime: string | null; eventType: string }[]>([]);
   const [weeklyMenu, setWeeklyMenu] = useState<{ date: string; dayName: string; items: { id: string; name: string; description: string | null; price: string; type: string }[] }[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -195,6 +197,16 @@ export default function RestaurantDetailPage({
     fetch(`/api/restaurants/${slug}/reviews`)
       .then((res) => res.json())
       .then(setReviewsData)
+      .catch(() => {});
+
+    fetch(`/api/happy-hours`)
+      .then((res) => res.json())
+      .then((data) => {
+        const mine = (data.happyHours || []).find(
+          (hh: { restaurant: { slug: string } | null }) => hh.restaurant?.slug === slug
+        );
+        if (mine) setActiveHappyHour(mine);
+      })
       .catch(() => {});
 
     fetch(`/api/events?slug=${slug}`)
@@ -377,6 +389,35 @@ export default function RestaurantDetailPage({
       {/* Description */}
       {r.description && hasPaidPlan && (
         <p className="mb-6 text-muted-foreground leading-relaxed">{r.description}</p>
+      )}
+
+      {/* ===== HAPPY HOUR BANNER ===== */}
+      {activeHappyHour && activeHappyHour.isActiveNow && (
+        <Card className="mb-6 border-yellow-500/40 bg-gradient-to-r from-yellow-500/10 via-orange-500/5 to-yellow-500/10 overflow-hidden">
+          <div className="h-1 bg-gradient-to-r from-yellow-400 to-orange-400" />
+          <CardContent className="flex items-center gap-4 pt-4 pb-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-yellow-500 text-yellow-950">
+              <Beer className="h-6 w-6" />
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-bold text-yellow-700 dark:text-yellow-400">{activeHappyHour.title}</h3>
+                {activeHappyHour.discount && (
+                  <Badge className="bg-yellow-500 text-yellow-950 text-xs">{activeHappyHour.discount}</Badge>
+                )}
+                <Badge className="bg-green-500 text-white text-xs animate-pulse">Právě probíhá</Badge>
+              </div>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {activeHappyHour.startTime} — {activeHappyHour.endTime}
+                {activeHappyHour.minutesRemaining && (
+                  <span className="ml-1 font-medium text-yellow-600">
+                    (zbývá {activeHappyHour.minutesRemaining} min)
+                  </span>
+                )}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* ===== CONTACT + SOCIAL + AMENITIES ===== */}
