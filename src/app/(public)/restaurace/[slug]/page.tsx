@@ -160,6 +160,16 @@ export default function RestaurantDetailPage({
     photos: { id: string; url: string; caption: string | null }[];
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [lightboxPhoto, setLightboxPhoto] = useState<string | null>(null);
+  const [reviewsData, setReviewsData] = useState<{
+    reviews: { id: string; authorName: string; rating: number; comment: string | null; createdAt: string }[];
+    avgRating: number;
+    totalReviews: number;
+  }>({ reviews: [], avgRating: 0, totalReviews: 0 });
+  const [reviewForm, setReviewForm] = useState({ authorName: "", rating: 0, comment: "" });
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
   useEffect(() => {
     fetch(`/api/restaurants/${slug}`)
@@ -168,12 +178,26 @@ export default function RestaurantDetailPage({
       .catch(() => setData(null))
       .finally(() => setLoading(false));
 
-    // Track page view
     fetch("/api/track", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ slug, viewType: "page" }),
     }).catch(() => {});
+
+    fetch(`/api/restaurants/${slug}/reviews`)
+      .then((res) => res.json())
+      .then(setReviewsData)
+      .catch(() => {});
+
+    fetch("/api/auth/me")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((meData) => {
+        if (meData?.user) {
+          setIsLoggedIn(true);
+          setReviewForm((f) => ({ ...f, authorName: meData.user.name }));
+        }
+      })
+      .catch(() => {});
   }, [slug]);
 
   if (loading) {
@@ -202,37 +226,7 @@ export default function RestaurantDetailPage({
   }
 
   const { restaurant: r, menu, dailyMenu, openingHours: hours, photos: photoList } = data;
-  const [lightboxPhoto, setLightboxPhoto] = useState<string | null>(null);
   const open = isOpenNow(hours);
-
-  // Reviews
-  const [reviewsData, setReviewsData] = useState<{
-    reviews: { id: string; authorName: string; rating: number; comment: string | null; createdAt: string }[];
-    avgRating: number;
-    totalReviews: number;
-  }>({ reviews: [], avgRating: 0, totalReviews: 0 });
-  const [reviewForm, setReviewForm] = useState({ authorName: "", rating: 0, comment: "" });
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [submittingReview, setSubmittingReview] = useState(false);
-  const [reviewSubmitted, setReviewSubmitted] = useState(false);
-
-  useEffect(() => {
-    fetch(`/api/restaurants/${slug}/reviews`)
-      .then((res) => res.json())
-      .then(setReviewsData)
-      .catch(() => {});
-
-    // Pre-fill name for logged-in users
-    fetch("/api/auth/me")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data?.user) {
-          setIsLoggedIn(true);
-          setReviewForm((f) => ({ ...f, authorName: data.user.name }));
-        }
-      })
-      .catch(() => {});
-  }, [slug]);
 
   async function submitReview(e: React.FormEvent) {
     e.preventDefault();
