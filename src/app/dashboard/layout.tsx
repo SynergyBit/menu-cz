@@ -26,6 +26,7 @@ const sidebarLinks = [
   { href: "/dashboard/profil", label: "Profil restaurace", icon: UtensilsCrossed },
   { href: "/dashboard/menu", label: "Jídelní lístek", icon: FileText },
   { href: "/dashboard/denni-menu", label: "Denní menu", icon: CalendarDays },
+  { href: "/dashboard/tydenni-menu", label: "Týdenní menu", icon: CalendarDays },
   { href: "/dashboard/hodiny", label: "Otevírací doba", icon: Clock },
   { href: "/dashboard/vizitka", label: "Vizitka", icon: IdCard },
   { href: "/dashboard/fotky", label: "Fotogalerie", icon: ImageIcon },

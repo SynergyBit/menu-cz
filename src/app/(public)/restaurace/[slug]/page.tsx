@@ -10,6 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { StarRating, RatingBadge } from "@/components/star-rating";
+import { AllergenBadges, DietaryFilterChips } from "@/components/allergen-badge";
+import { parseAllergens, dietaryFilters } from "@/lib/allergens";
 import { FavoriteButton } from "@/components/favorite-button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -38,6 +40,7 @@ import {
   Share2,
   ExternalLink,
   Loader2,
+  CalendarDays,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -167,6 +170,8 @@ export default function RestaurantDetailPage({
     totalReviews: number;
   }>({ reviews: [], avgRating: 0, totalReviews: 0 });
   const [reviewForm, setReviewForm] = useState({ authorName: "", rating: 0, comment: "" });
+  const [activeDietaryFilters, setActiveDietaryFilters] = useState<string[]>([]);
+  const [weeklyMenu, setWeeklyMenu] = useState<{ date: string; dayName: string; items: { id: string; name: string; description: string | null; price: string; type: string }[] }[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
@@ -187,6 +192,11 @@ export default function RestaurantDetailPage({
     fetch(`/api/restaurants/${slug}/reviews`)
       .then((res) => res.json())
       .then(setReviewsData)
+      .catch(() => {});
+
+    fetch(`/api/restaurants/${slug}/weekly`)
+      .then((res) => res.json())
+      .then((wData) => setWeeklyMenu(wData.week || []))
       .catch(() => {});
 
     fetch("/api/auth/me")
@@ -534,6 +544,7 @@ export default function RestaurantDetailPage({
             <TabsTrigger value="daily">Denní menu</TabsTrigger>
           )}
           <TabsTrigger value="menu">Jídelní lístek</TabsTrigger>
+          <TabsTrigger value="weekly">Týdenní menu</TabsTrigger>
           <TabsTrigger value="hours">Otevírací doba</TabsTrigger>
           <TabsTrigger value="reviews">
             Recenze{reviewsData.totalReviews > 0 ? ` (${reviewsData.totalReviews})` : ""}
@@ -605,6 +616,33 @@ export default function RestaurantDetailPage({
 
         {/* Full menu */}
         <TabsContent value="menu" className="mt-6 space-y-6">
+          {/* Dietary filter */}
+          {menu.length > 0 && hasPaidPlan && (
+            <Card>
+              <CardContent className="pt-4 pb-3">
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground shrink-0">Filtrovat alergeny:</span>
+                  <DietaryFilterChips
+                    activeFilters={activeDietaryFilters}
+                    onToggle={(key) =>
+                      setActiveDietaryFilters((prev) =>
+                        prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+                      )
+                    }
+                  />
+                  {activeDietaryFilters.length > 0 && (
+                    <button
+                      onClick={() => setActiveDietaryFilters([])}
+                      className="text-xs text-muted-foreground hover:text-foreground ml-auto"
+                    >
+                      Zrušit
+                    </button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           {menu.length === 0 ? (
             <Card className="py-8 text-center">
               <CardContent>
@@ -613,13 +651,34 @@ export default function RestaurantDetailPage({
               </CardContent>
             </Card>
           ) : (
-            menu.map((cat) => (
+            menu.map((cat) => {
+              // Filter items by dietary preferences
+              const excludeAllergens = activeDietaryFilters.flatMap(
+                (key) => dietaryFilters[key]?.excludeAllergens || []
+              );
+              const filteredItems = excludeAllergens.length > 0
+                ? cat.items.filter((item) => {
+                    const itemAllergens = parseAllergens(item.allergens);
+                    return !excludeAllergens.some((a) => itemAllergens.includes(a));
+                  })
+                : cat.items;
+
+              if (filteredItems.length === 0 && excludeAllergens.length > 0) return null;
+
+              return (
               <Card key={cat.id}>
                 <CardHeader>
-                  <CardTitle>{cat.name}</CardTitle>
+                  <CardTitle>
+                    {cat.name}
+                    {excludeAllergens.length > 0 && filteredItems.length !== cat.items.length && (
+                      <span className="ml-2 text-xs font-normal text-muted-foreground">
+                        ({filteredItems.length} z {cat.items.length})
+                      </span>
+                    )}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-1">
-                  {cat.items.map((item, idx) => (
+                  {filteredItems.map((item, idx) => (
                     <div key={item.id}>
                       {idx > 0 && <Separator className="my-2" />}
                       <div className="flex items-start justify-between gap-4 py-2">
@@ -634,7 +693,7 @@ export default function RestaurantDetailPage({
                             <p className="text-sm text-muted-foreground">{item.description}</p>
                           )}
                           {item.allergens && hasPaidPlan && (
-                            <p className="mt-1 text-xs text-muted-foreground">Alergeny: {item.allergens}</p>
+                            <AllergenBadges allergenStr={item.allergens} />
                           )}
                         </div>
                         <span className="shrink-0 font-semibold text-primary">{item.price} Kč</span>
@@ -643,11 +702,62 @@ export default function RestaurantDetailPage({
                   ))}
                 </CardContent>
               </Card>
-            ))
+              );
+            })
           )}
         </TabsContent>
 
         {/* Opening hours */}
+        {/* Weekly menu */}
+        <TabsContent value="weekly" className="mt-6">
+          {weeklyMenu.length === 0 ? (
+            <Card className="py-8 text-center">
+              <CardContent>
+                <CalendarDays className="mx-auto mb-3 h-10 w-10 text-muted-foreground/30" />
+                <p className="text-muted-foreground">Týdenní menu nebylo naplánováno</p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {weeklyMenu.map((day) => {
+                const isToday = day.date === new Date().toISOString().split("T")[0];
+                return (
+                  <Card key={day.date} className={isToday ? "border-primary/30 bg-primary/[0.02]" : ""}>
+                    <CardContent className="py-3 px-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className={`text-sm font-semibold ${isToday ? "text-primary" : ""}`}>
+                          {day.dayName}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {new Date(day.date).toLocaleDateString("cs-CZ", { day: "numeric", month: "numeric" })}
+                        </span>
+                        {isToday && <Badge className="text-[10px] px-1.5 py-0">dnes</Badge>}
+                      </div>
+                      <div className="space-y-1">
+                        {day.items.map((item) => {
+                          const Icon = typeIcons[item.type] || ChefHat;
+                          return (
+                            <div key={item.id} className="flex items-center justify-between text-sm">
+                              <div className="flex items-center gap-2">
+                                <Icon className="h-3.5 w-3.5 text-primary/50" />
+                                <span>{item.name}</span>
+                                {item.description && (
+                                  <span className="text-xs text-muted-foreground">— {item.description}</span>
+                                )}
+                              </div>
+                              <span className="font-semibold text-primary shrink-0 ml-2">{item.price} Kč</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+
         <TabsContent value="hours" className="mt-6">
           <Card>
             <CardHeader>
