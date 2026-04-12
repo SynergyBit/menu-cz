@@ -22,6 +22,7 @@ import {
   Crown,
   ArrowRight,
   Palette,
+  Sparkles,
 } from "lucide-react";
 import { PlanBadge } from "@/components/premium-gate";
 
@@ -227,8 +228,31 @@ export default function DashboardPage() {
         </div>
       )}
 
+      {/* Onboarding prompt for very incomplete profiles */}
+      {profile && profile.percent < 40 && (
+        <Card className="border-primary/20 bg-gradient-to-r from-primary/5 via-card to-warm/5">
+          <CardContent className="flex items-center gap-5 pt-6 pb-6">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <Sparkles className="h-6 w-6" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold">Dokončete nastavení restaurace</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
+                Projděte průvodce a nastavte profil, fotky, menu a otevírací dobu za pár minut.
+              </p>
+            </div>
+            <Link href="/dashboard/onboarding" className="shrink-0">
+              <Button className="gap-2">
+                Spustit průvodce
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Profile completeness warning */}
-      {profile && profile.missing.length > 0 && (
+      {profile && profile.percent >= 40 && profile.missing.length > 0 && (
         <Card className="border-yellow-500/20 bg-yellow-500/5">
           <CardContent className="flex items-start gap-3 pt-6">
             <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-yellow-600" />
