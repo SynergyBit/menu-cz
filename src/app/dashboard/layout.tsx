@@ -15,6 +15,7 @@ import {
   ImageIcon,
   BarChart3,
   Mail,
+  Sparkles,
   LogOut,
   ChevronLeft,
   Menu,
@@ -31,6 +32,7 @@ const sidebarLinks = [
   { href: "/dashboard/vizitka", label: "Vizitka", icon: IdCard },
   { href: "/dashboard/fotky", label: "Fotogalerie", icon: ImageIcon },
   { href: "/dashboard/qr-kod", label: "QR kód", icon: QrCode },
+  { href: "/dashboard/akce", label: "Akce", icon: Sparkles },
   { href: "/dashboard/zpravy", label: "Zprávy", icon: Mail },
   { href: "/dashboard/analytika", label: "Analytika", icon: BarChart3 },
 ];

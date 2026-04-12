@@ -16,6 +16,7 @@ import {
   Heart,
   ChefHat,
   CalendarDays,
+  Sparkles,
   Sun,
   Moon,
   User,
@@ -69,6 +70,7 @@ export function Navbar() {
   const navLinks = [
     { href: "/restaurace", label: "Restaurace", icon: Search },
     { href: "/dnes", label: "Denní menu", icon: CalendarDays },
+    { href: "/akce", label: "Akce", icon: Sparkles },
     { href: "/oblibene", label: "Oblíbené", icon: Heart },
     { href: "/pro-restaurace", label: "Pro restaurace", icon: ChefHat },
   ];

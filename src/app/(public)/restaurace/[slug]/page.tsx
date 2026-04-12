@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { StarRating, RatingBadge } from "@/components/star-rating";
 import { AllergenBadges, DietaryFilterChips } from "@/components/allergen-badge";
 import { parseAllergens, dietaryFilters } from "@/lib/allergens";
+import { getEventType } from "@/lib/event-types";
 import { FavoriteButton } from "@/components/favorite-button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -41,6 +42,7 @@ import {
   ExternalLink,
   Loader2,
   CalendarDays,
+  Sparkles,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -171,6 +173,7 @@ export default function RestaurantDetailPage({
   }>({ reviews: [], avgRating: 0, totalReviews: 0 });
   const [reviewForm, setReviewForm] = useState({ authorName: "", rating: 0, comment: "" });
   const [activeDietaryFilters, setActiveDietaryFilters] = useState<string[]>([]);
+  const [restaurantEvents, setRestaurantEvents] = useState<{ id: string; title: string; eventDate: string; eventTime: string | null; eventType: string }[]>([]);
   const [weeklyMenu, setWeeklyMenu] = useState<{ date: string; dayName: string; items: { id: string; name: string; description: string | null; price: string; type: string }[] }[]>([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
@@ -192,6 +195,16 @@ export default function RestaurantDetailPage({
     fetch(`/api/restaurants/${slug}/reviews`)
       .then((res) => res.json())
       .then(setReviewsData)
+      .catch(() => {});
+
+    fetch(`/api/events?slug=${slug}`)
+      .then((res) => res.json())
+      .then((data) => {
+        const restaurantEvts = (data.events || []).filter(
+          (e: { restaurant: { slug: string } | null }) => e.restaurant?.slug === slug
+        );
+        setRestaurantEvents(restaurantEvts);
+      })
       .catch(() => {});
 
     fetch(`/api/restaurants/${slug}/weekly`)
@@ -491,6 +504,45 @@ export default function RestaurantDetailPage({
       {/* ===== CONTACT FORM ===== */}
       {hasPaidPlan && r.acceptsReservations && (
         <ContactForm slug={r.slug} />
+      )}
+
+      {/* ===== EVENTS ===== */}
+      {restaurantEvents.length > 0 && (
+        <div className="mb-8">
+          <h2 className="mb-3 text-lg font-semibold flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            Nadcházející akce
+          </h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {restaurantEvents.slice(0, 4).map((event) => {
+              const type = getEventType(event.eventType);
+              const date = new Date(event.eventDate);
+              return (
+                <Card key={event.id} className="transition-all hover:shadow-md">
+                  <CardContent className="flex items-center gap-3 pt-3 pb-3">
+                    <div className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl bg-primary/10">
+                      <span className="text-[9px] font-medium text-muted-foreground uppercase">
+                        {date.toLocaleDateString("cs-CZ", { month: "short" })}
+                      </span>
+                      <span className="text-lg font-bold text-primary">{date.getDate()}</span>
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm truncate">{event.title}</p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <Badge variant="outline" className="text-[10px] gap-0.5 px-1.5 py-0">
+                          {type.emoji} {type.label}
+                        </Badge>
+                        {event.eventTime && (
+                          <span className="text-[10px] text-muted-foreground">{event.eventTime}</span>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </div>
       )}
 
       {/* ===== PHOTO GALLERY ===== */}
