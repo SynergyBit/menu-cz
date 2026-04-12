@@ -128,7 +128,7 @@ const benefits = [
   },
   {
     title: "Obědy z okolí přicházejí k vám",
-    description: "Denní menu agregátor MenuCZ je první místo, kam lidé koukají při hledání oběda. Buďte v něm.",
+    description: "Denní menu agregátor Gastroo je první místo, kam lidé koukají při hledání oběda. Buďte v něm.",
     icon: Users,
   },
 ];
@@ -218,7 +218,7 @@ export default function ProRestauracePage() {
       <section className="border-t bg-muted/30 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="mb-10 text-center">
-            <h2 className="text-2xl font-bold sm:text-3xl">Pro koho je MenuCZ?</h2>
+            <h2 className="text-2xl font-bold sm:text-3xl">Pro koho je Gastroo?</h2>
           </div>
           <div className="grid gap-6 sm:grid-cols-3">
             {targetAudience.map((t) => (
@@ -279,7 +279,7 @@ export default function ProRestauracePage() {
           <div className="mb-12 text-center">
             <Badge variant="outline" className="mb-4">Výhody</Badge>
             <h2 className="text-3xl font-bold sm:text-4xl">
-              Proč restaurace volí MenuCZ
+              Proč restaurace volí Gastroo
             </h2>
           </div>
 

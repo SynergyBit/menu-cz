@@ -1,4 +1,4 @@
-const STORAGE_KEY = "menucz_favorites";
+const STORAGE_KEY = "gastroo_favorites";
 
 export function getFavorites(): string[] {
   if (typeof window === "undefined") return [];

@@ -17,19 +17,16 @@ import {
   QrCode,
   Star,
   ChefHat,
-  Salad,
-  Pizza,
-  Soup,
   ArrowRight,
   Smartphone,
   Heart,
-  Filter,
   CalendarDays,
   Map,
   UserPlus,
   SlidersHorizontal,
   BookOpen,
   Utensils,
+  Users,
   Coffee,
 } from "lucide-react";
 
@@ -43,34 +40,6 @@ const cuisineTypes = [
   { label: "Kavárna", emoji: "☕" },
 ];
 
-function AnimatedCounter({ end, label }: { end: number; label: string }) {
-  const [count, setCount] = useState(0);
-  useEffect(() => {
-    if (end === 0) return;
-    const duration = 2000;
-    const steps = 60;
-    const increment = end / steps;
-    let current = 0;
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= end) {
-        setCount(end);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(current));
-      }
-    }, duration / steps);
-    return () => clearInterval(timer);
-  }, [end]);
-
-  return (
-    <div className="text-center">
-      <p className="text-3xl font-bold text-primary sm:text-4xl">{count > 0 ? `${count}+` : "..."}</p>
-      <p className="mt-1 text-sm text-muted-foreground">{label}</p>
-    </div>
-  );
-}
-
 export default function HomePage() {
   const [stats, setStats] = useState({ restaurants: 0, menuItems: 0, reviews: 0, users: 0 });
 
@@ -81,66 +50,104 @@ export default function HomePage() {
   return (
     <div>
       {/* ======= HERO ======= */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-warm/10" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,oklch(0.55_0.18_30/0.12),transparent)]" />
-        <div className="absolute right-0 top-0 -mr-40 -mt-40 h-80 w-80 rounded-full bg-primary/5 blur-3xl" />
-        <div className="absolute bottom-0 left-0 -mb-40 -ml-40 h-80 w-80 rounded-full bg-warm/10 blur-3xl" />
+      <section className="relative overflow-hidden min-h-[85vh] flex items-center">
+        {/* Background layers */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] via-background to-background" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-100px,oklch(0.55_0.18_30/0.08),transparent)]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-gradient-to-br from-primary/[0.04] to-warm/[0.06] blur-3xl" />
 
-        <div className="relative mx-auto max-w-7xl px-4 pb-20 pt-24 sm:px-6 sm:pt-32">
+        {/* Decorative dots */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-[0.03]" style={{ backgroundImage: "radial-gradient(circle, currentColor 1px, transparent 1px)", backgroundSize: "32px 32px" }} />
+
+        <div className="relative mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
           <div className="mx-auto max-w-3xl text-center">
-            <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-sm shadow-sm">
-              <Star className="mr-1.5 h-3.5 w-3.5 text-primary" />
-              Vyhledávač restaurací a jídelních lístků
-            </Badge>
+            {/* Pill badge */}
+            <div className="mb-8 inline-flex items-center gap-2 rounded-full border bg-card/80 backdrop-blur-sm px-4 py-2 text-sm shadow-sm">
+              <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-muted-foreground">
+                <span className="font-semibold text-foreground">{stats.restaurants || "..."}</span> restaurací s aktuálním menu
+              </span>
+            </div>
 
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl">
-              Kam dnes na jídlo?
+            <h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl leading-[1.1]">
+              Kde dnes
               <br />
-              <span className="bg-gradient-to-r from-primary via-primary to-primary/70 bg-clip-text text-transparent">
-                Najděte to za vteřinu
+              <span className="relative inline-block">
+                <span className="bg-gradient-to-r from-primary via-primary to-primary/60 bg-clip-text text-transparent">
+                  poobědváte?
+                </span>
+                <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 300 8" fill="none">
+                  <path d="M2 6c50-5 100-5 150-2s100 3 146-1" stroke="oklch(0.55 0.18 30)" strokeWidth="3" strokeLinecap="round" opacity="0.25" />
+                </svg>
               </span>
             </h1>
 
-            <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground leading-relaxed">
-              Prohlédněte si menu restaurací, zjistěte co dnes vaří k obědu
-              a najděte nové oblíbené podniky ve vašem městě.
+            <p className="mx-auto mt-8 max-w-lg text-lg text-muted-foreground leading-relaxed sm:text-xl">
+              Menu, denní nabídky a recenze restaurací ve vašem okolí.
+              Vyberte si jídlo, ne restauraci naslepo.
             </p>
 
-            <SearchBar
-              className="mx-auto mt-8 max-w-xl"
-              inputClassName="h-14 rounded-xl pl-12 text-base shadow-lg shadow-primary/5 border-border/50 focus:border-primary/30"
-            />
+            {/* Search */}
+            <div className="mx-auto mt-10 max-w-xl">
+              <SearchBar
+                className=""
+                inputClassName="h-14 rounded-2xl pl-12 text-base shadow-xl shadow-primary/[0.06] border-border/50 focus:border-primary/40 bg-card"
+              />
+            </div>
 
             {/* Cuisine chips */}
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-2">
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
               {cuisineTypes.map((c) => (
                 <Link
                   key={c.label}
                   href={`/restaurace?cuisine=${encodeURIComponent(c.label.toLowerCase())}`}
                 >
-                  <Badge
-                    variant="outline"
-                    className="cursor-pointer gap-1.5 px-3 py-1.5 transition-all hover:bg-primary hover:text-primary-foreground hover:border-primary shadow-sm"
-                  >
+                  <button className="inline-flex items-center gap-1.5 rounded-full border bg-card/80 px-3.5 py-2 text-sm transition-all hover:bg-primary hover:text-primary-foreground hover:border-primary hover:shadow-md hover:-translate-y-0.5 active:translate-y-0">
                     <span>{c.emoji}</span>
                     {c.label}
-                  </Badge>
+                  </button>
                 </Link>
               ))}
+            </div>
+
+            {/* Quick links */}
+            <div className="mt-10 flex flex-wrap items-center justify-center gap-3 text-sm">
+              <Link href="/dnes" className="group flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors">
+                <CalendarDays className="h-4 w-4" />
+                Dnešní denní menu
+                <ArrowRight className="h-3 w-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+              </Link>
+              <span className="text-border">|</span>
+              <Link href="/restaurace" className="group flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors">
+                <Map className="h-4 w-4" />
+                Zobrazit na mapě
+                <ArrowRight className="h-3 w-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+              </Link>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ======= STATS ======= */}
-      <section className="border-y bg-card py-10">
+      {/* ======= TRUST BAR ======= */}
+      <section className="border-y bg-muted/30 py-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-            <AnimatedCounter end={stats.restaurants} label="Restaurací" />
-            <AnimatedCounter end={stats.menuItems} label="Jídel v menu" />
-            <AnimatedCounter end={stats.reviews} label="Recenzí" />
-            <AnimatedCounter end={stats.users} label="Uživatelů" />
+          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-sm text-muted-foreground">
+            <span className="flex items-center gap-2">
+              <UtensilsCrossed className="h-4 w-4 text-primary" />
+              <strong className="text-foreground">{stats.restaurants || "..."}+</strong> restaurací
+            </span>
+            <span className="flex items-center gap-2">
+              <BookOpen className="h-4 w-4 text-primary" />
+              <strong className="text-foreground">{stats.menuItems || "..."}+</strong> jídel v menu
+            </span>
+            <span className="flex items-center gap-2">
+              <Star className="h-4 w-4 text-primary" />
+              <strong className="text-foreground">{stats.reviews || "..."}+</strong> recenzí
+            </span>
+            <span className="flex items-center gap-2">
+              <Users className="h-4 w-4 text-primary" />
+              <strong className="text-foreground">{stats.users || "..."}+</strong> uživatelů
+            </span>
           </div>
         </div>
       </section>
@@ -313,7 +320,7 @@ export default function HomePage() {
           <div className="mb-12 text-center">
             <Badge variant="outline" className="mb-4">Průvodce aplikací</Badge>
             <h2 className="text-3xl font-bold sm:text-4xl">
-              Jak se v MenuCZ orientovat
+              Jak se v Gastroo orientovat
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
               Rychlý přehled sekcí, kde co najdete

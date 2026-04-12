@@ -33,7 +33,7 @@ export default function AdminLayout({
                 <UtensilsCrossed className="h-4 w-4" />
               </div>
               <span className="font-bold">
-                Menu<span className="text-primary">CZ</span>
+                Gastr<span className="text-primary">oo</span>
               </span>
             </Link>
             <div className="flex items-center gap-1.5 rounded-md bg-destructive/10 px-2.5 py-1 text-sm font-medium text-destructive">

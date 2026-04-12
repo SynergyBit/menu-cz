@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "MenuCZ — Najdi restauraci, prohlédni si menu",
-    template: "%s | MenuCZ",
+    default: "Gastroo — Najdi restauraci, prohlédni si menu",
+    template: "%s | Gastroo",
   },
   description:
     "Interaktivní vyhledávač restaurací. Prohlédni si jídelní lístek, denní menu a otevírací dobu restaurací ve tvém okolí.",
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "cs_CZ",
-    siteName: "MenuCZ",
-    title: "MenuCZ — Vyhledávač restaurací",
+    siteName: "Gastroo",
+    title: "Gastroo — Vyhledávač restaurací",
     description: "Prohlédněte si jídelní lístek, denní menu a najděte svou oblíbenou restauraci.",
   },
   robots: {

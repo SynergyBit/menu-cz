@@ -1,6 +1,6 @@
 {
-  "name": "MenuCZ",
-  "short_name": "MenuCZ",
+  "name": "Gastroo",
+  "short_name": "Gastroo",
   "description": "Interaktivní vyhledávač restaurací a jídelních lístků",
   "start_url": "/",
   "display": "standalone",

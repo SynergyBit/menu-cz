@@ -291,7 +291,7 @@ export default function MobilePage({
           <p className="text-xs text-muted-foreground">
             Powered by{" "}
             <Link href="/" className="font-semibold text-primary hover:underline">
-              MenuCZ
+              Gastroo
             </Link>
           </p>
         </div>

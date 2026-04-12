@@ -23,10 +23,10 @@ export async function generateMetadata({
     .limit(1);
 
   if (!restaurant) {
-    return { title: "Restaurace nenalezena — MenuCZ" };
+    return { title: "Restaurace nenalezena — Gastroo" };
   }
 
-  const title = `${restaurant.name}${restaurant.city ? ` — ${restaurant.city}` : ""} | MenuCZ`;
+  const title = `${restaurant.name}${restaurant.city ? ` — ${restaurant.city}` : ""} | Gastroo`;
   const description =
     restaurant.tagline ||
     restaurant.description ||

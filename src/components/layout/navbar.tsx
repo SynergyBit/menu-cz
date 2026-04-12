@@ -81,7 +81,7 @@ export function Navbar() {
             <UtensilsCrossed className="h-5 w-5" />
           </div>
           <span className="text-lg font-bold tracking-tight">
-            Menu<span className="text-primary">CZ</span>
+            Gastr<span className="text-primary">oo</span>
           </span>
         </Link>
 

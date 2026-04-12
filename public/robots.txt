@@ -4,4 +4,4 @@ Disallow: /api/
 Disallow: /dashboard/
 Disallow: /admin/
 
-Sitemap: https://menu-app-production-d230.up.railway.app/sitemap.xml
+Sitemap: https://gastroo.cz/sitemap.xml

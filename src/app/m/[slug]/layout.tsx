@@ -17,11 +17,11 @@ export async function generateMetadata({
     .limit(1);
 
   if (!restaurant) {
-    return { title: "Menu — MenuCZ" };
+    return { title: "Menu — Gastroo" };
   }
 
   return {
-    title: `${restaurant.name} — Menu | MenuCZ`,
+    title: `${restaurant.name} — Menu | Gastroo`,
     description: `Jídelní lístek a denní menu — ${restaurant.name}${restaurant.city ? `, ${restaurant.city}` : ""}`,
   };
 }

@@ -12,7 +12,7 @@ export function Footer() {
                 <UtensilsCrossed className="h-4 w-4" />
               </div>
               <span className="text-lg font-bold tracking-tight">
-                Menu<span className="text-primary">CZ</span>
+                Gastr<span className="text-primary">oo</span>
               </span>
             </Link>
             <p className="mt-3 text-sm text-muted-foreground">
@@ -31,7 +31,7 @@ export function Footer() {
           <div>
             <h3 className="mb-3 text-sm font-semibold">Pro restaurace</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/pro-restaurace" className="hover:text-foreground transition-colors">Proč MenuCZ</Link></li>
+              <li><Link href="/pro-restaurace" className="hover:text-foreground transition-colors">Proč Gastroo</Link></li>
               <li><Link href="/cenik" className="hover:text-foreground transition-colors">Ceník</Link></li>
               <li><Link href="/registrace" className="hover:text-foreground transition-colors">Registrace</Link></li>
               <li><Link href="/prihlaseni" className="hover:text-foreground transition-colors">Přihlášení</Link></li>
@@ -49,7 +49,7 @@ export function Footer() {
         </div>
 
         <div className="mt-10 border-t pt-6 text-center text-xs text-muted-foreground">
-          &copy; {new Date().getFullYear()} MenuCZ. Všechna práva vyhrazena.
+          &copy; {new Date().getFullYear()} Gastroo. Všechna práva vyhrazena.
         </div>
       </div>
     </footer>

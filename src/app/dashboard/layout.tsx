@@ -42,7 +42,7 @@ function SidebarContent({ pathname, onLogout }: { pathname: string; onLogout: ()
           <UtensilsCrossed className="h-4 w-4" />
         </div>
         <span className="text-lg font-bold tracking-tight">
-          Menu<span className="text-primary">CZ</span>
+          Gastr<span className="text-primary">oo</span>
         </span>
       </div>
       <nav className="flex-1 space-y-1 p-3">

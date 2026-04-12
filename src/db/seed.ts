@@ -7,7 +7,7 @@ async function seed() {
   const db = drizzle(process.env.DATABASE_URL!);
 
   // Create admin user
-  const adminEmail = process.env.ADMIN_EMAIL || "admin@menucz.cz";
+  const adminEmail = process.env.ADMIN_EMAIL || "admin@gastroo.cz";
   const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
 
   const existing = await db.select().from(users).where(eq(users.email, adminEmail)).limit(1);

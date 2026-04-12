@@ -12,7 +12,7 @@ export async function generateMetadata({
     title: `Restaurace ${cityName}`,
     description: `Nejlepší restaurace v ${cityName}. Prohlédněte si jídelní lístky, denní menu, hodnocení a otevírací dobu restaurací v ${cityName}.`,
     openGraph: {
-      title: `Restaurace v ${cityName} | MenuCZ`,
+      title: `Restaurace v ${cityName} | Gastroo`,
       description: `Najděte restauraci v ${cityName} — jídelní lístky, denní menu a recenze.`,
     },
   };

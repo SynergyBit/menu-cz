@@ -8,7 +8,7 @@ export async function geocodeAddress(
       `https://nominatim.openstreetmap.org/search?format=json&q=${query}&limit=1`,
       {
         headers: {
-          "User-Agent": "MenuCZ/1.0",
+          "User-Agent": "Gastroo/1.0",
         },
       }
     );
