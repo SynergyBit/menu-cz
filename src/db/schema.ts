@@ -206,6 +206,14 @@ export const reservations = pgTable("reservations", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const menuTemplates = pgTable("menu_templates", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  restaurantId: uuid("restaurant_id").notNull().references(() => restaurants.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  items: text("items").notNull(), // JSON: [{name, description, price, type}]
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const recipes = pgTable("recipes", {
   id: uuid("id").defaultRandom().primaryKey(),
   title: text("title").notNull(),
