@@ -52,6 +52,7 @@ export function Footer() {
           <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground mb-3">
             <Link href="/podminky" className="hover:text-foreground transition-colors">Obchodní podmínky</Link>
             <Link href="/soukromi" className="hover:text-foreground transition-colors">Ochrana osobních údajů</Link>
+            <Link href="/o-nas" className="hover:text-foreground transition-colors">O nás</Link>
             <Link href="/kontakt" className="hover:text-foreground transition-colors">Kontakt</Link>
           </div>
           <p className="text-center text-xs text-muted-foreground">
