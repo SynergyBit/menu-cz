@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { events } from "@/db/schema";
 import { getSession } from "@/lib/auth";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 export async function GET() {
   const session = await getSession();
@@ -62,6 +62,6 @@ export async function DELETE(request: NextRequest) {
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Chybí ID" }, { status: 400 });
 
-  await db.delete(events).where(eq(events.id, id));
+  await db.delete(events).where(and(eq(events.id, id), eq(events.restaurantId, session.restaurantId)));
   return NextResponse.json({ success: true });
 }

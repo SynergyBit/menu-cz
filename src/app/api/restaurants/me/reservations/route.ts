@@ -30,6 +30,6 @@ export async function PATCH(request: NextRequest) {
   if (status) updates.status = status;
   if (adminNote !== undefined) updates.adminNote = adminNote;
 
-  await db.update(reservations).set(updates).where(eq(reservations.id, id));
+  await db.update(reservations).set(updates).where(and(eq(reservations.id, id), eq(reservations.restaurantId, session.restaurantId)));
   return NextResponse.json({ success: true });
 }

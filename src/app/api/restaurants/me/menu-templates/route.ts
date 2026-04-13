@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     if (action === "applyTemplate") {
       if (!templateId || !date) return NextResponse.json({ error: "Šablona a datum jsou povinné" }, { status: 400 });
 
-      const [template] = await db.select().from(menuTemplates).where(eq(menuTemplates.id, templateId)).limit(1);
+      const [template] = await db.select().from(menuTemplates).where(and(eq(menuTemplates.id, templateId), eq(menuTemplates.restaurantId, session.restaurantId))).limit(1);
       if (!template) return NextResponse.json({ error: "Šablona nenalezena" }, { status: 404 });
 
       const targetDate = new Date(date);
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
     // Delete template
     if (action === "deleteTemplate") {
       if (!templateId) return NextResponse.json({ error: "Chybí ID" }, { status: 400 });
-      await db.delete(menuTemplates).where(eq(menuTemplates.id, templateId));
+      await db.delete(menuTemplates).where(and(eq(menuTemplates.id, templateId), eq(menuTemplates.restaurantId, session.restaurantId)));
       return NextResponse.json({ success: true });
     }
 

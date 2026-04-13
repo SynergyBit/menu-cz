@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { coupons, restaurants } from "@/db/schema";
 import { getSession } from "@/lib/auth";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 export async function GET() {
   const session = await getSession();
@@ -45,6 +45,6 @@ export async function DELETE(request: NextRequest) {
   if (!session?.restaurantId) return NextResponse.json({ error: "Nepřihlášen" }, { status: 401 });
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
-  if (id) await db.delete(coupons).where(eq(coupons.id, id));
+  if (id) await db.delete(coupons).where(and(eq(coupons.id, id), eq(coupons.restaurantId, session.restaurantId)));
   return NextResponse.json({ success: true });
 }

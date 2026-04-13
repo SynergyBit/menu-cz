@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { menuCategories, menuItems } from "@/db/schema";
 import { getSession } from "@/lib/auth";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export async function GET() {
   const session = await getSession();
@@ -77,18 +77,18 @@ export async function POST(request: NextRequest) {
           allergens: data.allergens,
           isAvailable: data.isAvailable,
         })
-        .where(eq(menuItems.id, data.id))
+        .where(and(eq(menuItems.id, data.id), eq(menuItems.restaurantId, session.restaurantId)))
         .returning();
       return NextResponse.json({ item });
     }
 
     if (action === "deleteItem") {
-      await db.delete(menuItems).where(eq(menuItems.id, data.id));
+      await db.delete(menuItems).where(and(eq(menuItems.id, data.id), eq(menuItems.restaurantId, session.restaurantId)));
       return NextResponse.json({ success: true });
     }
 
     if (action === "deleteCategory") {
-      await db.delete(menuCategories).where(eq(menuCategories.id, data.id));
+      await db.delete(menuCategories).where(and(eq(menuCategories.id, data.id), eq(menuCategories.restaurantId, session.restaurantId)));
       return NextResponse.json({ success: true });
     }
 

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { happyHours } from "@/db/schema";
 import { getSession } from "@/lib/auth";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 export async function GET() {
   const session = await getSession();
@@ -58,7 +58,7 @@ export async function PATCH(request: NextRequest) {
   }
 
   const { id, isActive } = await request.json();
-  await db.update(happyHours).set({ isActive }).where(eq(happyHours.id, id));
+  await db.update(happyHours).set({ isActive }).where(and(eq(happyHours.id, id), eq(happyHours.restaurantId, session.restaurantId)));
   return NextResponse.json({ success: true });
 }
 
@@ -71,7 +71,7 @@ export async function DELETE(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
   if (id) {
-    await db.delete(happyHours).where(eq(happyHours.id, id));
+    await db.delete(happyHours).where(and(eq(happyHours.id, id), eq(happyHours.restaurantId, session.restaurantId)));
   }
   return NextResponse.json({ success: true });
 }

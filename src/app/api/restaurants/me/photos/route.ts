@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { photos, restaurants } from "@/db/schema";
 import { getSession } from "@/lib/auth";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { getPhotoLimit } from "@/lib/plans";
 
 export async function GET() {
@@ -98,6 +98,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Chybí ID" }, { status: 400 });
   }
 
-  await db.delete(photos).where(eq(photos.id, photoId));
+  await db.delete(photos).where(and(eq(photos.id, photoId), eq(photos.restaurantId, session.restaurantId)));
   return NextResponse.json({ success: true });
 }

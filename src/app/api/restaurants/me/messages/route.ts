@@ -33,7 +33,7 @@ export async function PATCH(request: NextRequest) {
 
   const { id, isRead } = await request.json();
 
-  await db.update(messages).set({ isRead }).where(eq(messages.id, id));
+  await db.update(messages).set({ isRead }).where(and(eq(messages.id, id), eq(messages.restaurantId, session.restaurantId)));
 
   return NextResponse.json({ success: true });
 }
