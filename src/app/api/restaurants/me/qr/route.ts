@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
   }
 
   const [restaurant] = await db
-    .select({ slug: restaurants.slug, name: restaurants.name })
+    .select({ slug: restaurants.slug, name: restaurants.name, plan: restaurants.plan })
     .from(restaurants)
     .where(eq(restaurants.id, session.restaurantId))
     .limit(1);
@@ -23,26 +23,33 @@ export async function GET(request: NextRequest) {
 
   const { searchParams } = new URL(request.url);
   const format = searchParams.get("format") || "png";
+  const color = searchParams.get("color") || "#1a1a1a";
+  const bgColor = searchParams.get("bg") || "#ffffff";
+  const size = Math.min(Math.max(parseInt(searchParams.get("size") || "512"), 128), 1024);
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || request.headers.get("x-forwarded-proto") + "://" + request.headers.get("host");
   const menuUrl = `${baseUrl}/m/${restaurant.slug}`;
+
+  // Only premium can customize colors
+  const isPremium = restaurant.plan === "premium";
+  const darkColor = isPremium ? color : "#1a1a1a";
+  const lightColor = isPremium ? bgColor : "#ffffff";
 
   if (format === "svg") {
     const svg = await QRCode.toString(menuUrl, {
       type: "svg",
       width: 300,
       margin: 2,
-      color: { dark: "#1a1a1a", light: "#ffffff" },
+      color: { dark: darkColor, light: lightColor },
     });
     return new NextResponse(svg, {
       headers: { "Content-Type": "image/svg+xml" },
     });
   }
 
-  // PNG
   const buffer = await QRCode.toBuffer(menuUrl, {
-    width: 512,
+    width: size,
     margin: 2,
-    color: { dark: "#1a1a1a", light: "#ffffff" },
+    color: { dark: darkColor, light: lightColor },
   });
 
   return new NextResponse(new Uint8Array(buffer), {
