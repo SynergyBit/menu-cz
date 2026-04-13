@@ -32,6 +32,7 @@ const sidebarLinks = [
   { href: "/dashboard/vizitka", label: "Vizitka", icon: IdCard },
   { href: "/dashboard/fotky", label: "Fotogalerie", icon: ImageIcon },
   { href: "/dashboard/qr-kod", label: "QR kód", icon: QrCode },
+  { href: "/dashboard/rezervace", label: "Rezervace", icon: CalendarDays },
   { href: "/dashboard/akce", label: "Akce", icon: Sparkles },
   { href: "/dashboard/happy-hours", label: "Happy Hours", icon: Clock },
   { href: "/dashboard/zpravy", label: "Zprávy", icon: Mail },

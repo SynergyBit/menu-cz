@@ -174,6 +174,10 @@ export default function RestaurantDetailPage({
   }>({ reviews: [], avgRating: 0, totalReviews: 0 });
   const [reviewForm, setReviewForm] = useState({ authorName: "", rating: 0, comment: "" });
   const [activeDietaryFilters, setActiveDietaryFilters] = useState<string[]>([]);
+  const [reservationSettings, setReservationSettings] = useState<{
+    available: boolean; minHoursAhead: number; maxDaysAhead: number;
+    maxPartySize: number; slotMinutes: number; notes: string | null;
+  } | null>(null);
   const [activeHappyHour, setActiveHappyHour] = useState<{ title: string; discount: string | null; startTime: string; endTime: string; isActiveNow: boolean; minutesRemaining: number | null } | null>(null);
   const [restaurantEvents, setRestaurantEvents] = useState<{ id: string; title: string; eventDate: string; eventTime: string | null; eventType: string }[]>([]);
   const [weeklyMenu, setWeeklyMenu] = useState<{ date: string; dayName: string; items: { id: string; name: string; description: string | null; price: string; type: string }[] }[]>([]);
@@ -197,6 +201,11 @@ export default function RestaurantDetailPage({
     fetch(`/api/restaurants/${slug}/reviews`)
       .then((res) => res.json())
       .then(setReviewsData)
+      .catch(() => {});
+
+    fetch(`/api/restaurants/${slug}/reserve`)
+      .then((res) => res.json())
+      .then((data) => { if (data.available) setReservationSettings(data); })
       .catch(() => {});
 
     fetch(`/api/happy-hours`)
@@ -540,6 +549,11 @@ export default function RestaurantDetailPage({
             />
           </Suspense>
         </div>
+      )}
+
+      {/* ===== RESERVATION WIDGET ===== */}
+      {reservationSettings && reservationSettings.available && (
+        <ReservationWidget slug={r.slug} settings={reservationSettings} />
       )}
 
       {/* ===== CONTACT FORM ===== */}
@@ -982,6 +996,121 @@ export default function RestaurantDetailPage({
         </TabsContent>
       </Tabs>
     </div>
+  );
+}
+
+function ReservationWidget({ slug, settings }: {
+  slug: string;
+  settings: { maxPartySize: number; slotMinutes: number; maxDaysAhead: number; minHoursAhead: number; notes: string | null };
+}) {
+  const [form, setForm] = useState({ guestName: "", guestPhone: "", guestEmail: "", date: "", time: "", partySize: "2", note: "" });
+  const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
+
+  // Generate time slots
+  const slots: string[] = [];
+  for (let h = 10; h < 23; h++) {
+    for (let m = 0; m < 60; m += (settings.slotMinutes || 30)) {
+      slots.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
+    }
+  }
+
+  // Date limits
+  const minDate = new Date();
+  minDate.setHours(minDate.getHours() + (settings.minHoursAhead || 2));
+  const maxDate = new Date();
+  maxDate.setDate(maxDate.getDate() + (settings.maxDaysAhead || 30));
+  const minDateStr = minDate.toISOString().split("T")[0];
+  const maxDateStr = maxDate.toISOString().split("T")[0];
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError("");
+    if (!form.guestName || !form.guestPhone || !form.date || !form.time) {
+      setError("Vyplňte jméno, telefon, datum a čas");
+      return;
+    }
+    setSending(true);
+    try {
+      const res = await fetch(`/api/restaurants/${slug}/reserve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) { setSent(true); }
+      else { const d = await res.json(); setError(d.error || "Chyba"); }
+    } catch { setError("Chyba připojení"); }
+    finally { setSending(false); }
+  }
+
+  if (sent) {
+    return (
+      <Card className="mb-8 border-green-500/20 bg-green-500/5">
+        <CardContent className="py-8 text-center">
+          <CalendarCheck className="mx-auto mb-3 h-8 w-8 text-green-600" />
+          <h3 className="text-lg font-semibold text-green-700 dark:text-green-400">Rezervace odeslána!</h3>
+          <p className="mt-2 text-sm text-muted-foreground">Restaurace vám brzy potvrdí vaši rezervaci.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="mb-8 border-primary/20 bg-primary/[0.02]">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <CalendarCheck className="h-5 w-5 text-primary" />
+          Rezervovat stůl
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-3">
+          {error && <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</div>}
+          {settings.notes && <p className="text-xs text-muted-foreground italic">{settings.notes}</p>}
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Datum *</Label>
+              <Input type="date" value={form.date} onChange={(e) => setForm({ ...form, date: e.target.value })} min={minDateStr} max={maxDateStr} required />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Čas *</Label>
+              <select value={form.time} onChange={(e) => setForm({ ...form, time: e.target.value })} className="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm" required>
+                <option value="">Vyberte čas</option>
+                {slots.map((s) => <option key={s} value={s}>{s}</option>)}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid gap-3 sm:grid-cols-3">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Počet osob *</Label>
+              <select value={form.partySize} onChange={(e) => setForm({ ...form, partySize: e.target.value })} className="flex h-9 w-full rounded-md border bg-transparent px-3 py-1 text-sm">
+                {Array.from({ length: settings.maxPartySize || 10 }, (_, i) => i + 1).map((n) => (
+                  <option key={n} value={n}>{n} {n === 1 ? "osoba" : n < 5 ? "osoby" : "osob"}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Jméno *</Label>
+              <Input value={form.guestName} onChange={(e) => setForm({ ...form, guestName: e.target.value })} placeholder="Jan Novák" required />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Telefon *</Label>
+              <Input value={form.guestPhone} onChange={(e) => setForm({ ...form, guestPhone: e.target.value })} placeholder="+420..." required />
+            </div>
+          </div>
+
+          <Input value={form.note} onChange={(e) => setForm({ ...form, note: e.target.value })} placeholder="Poznámka (volitelné)" />
+
+          <Button type="submit" className="w-full gap-2" disabled={sending}>
+            {sending ? <Loader2 className="h-4 w-4 animate-spin" /> : <CalendarCheck className="h-4 w-4" />}
+            Rezervovat
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
 

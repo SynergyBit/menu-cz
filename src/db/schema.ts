@@ -44,6 +44,13 @@ export const restaurants = pgTable("restaurants", {
   hasOutdoorSeating: boolean("has_outdoor_seating").default(false),
   hasLiveMusic: boolean("has_live_music").default(false),
   themeColor: text("theme_color"),
+  // Reservation settings
+  reservationsEnabled: boolean("reservations_enabled").default(false),
+  reservationMinHoursAhead: integer("reservation_min_hours_ahead").default(2),
+  reservationMaxDaysAhead: integer("reservation_max_days_ahead").default(30),
+  reservationMaxPartySize: integer("reservation_max_party_size").default(10),
+  reservationSlotMinutes: integer("reservation_slot_minutes").default(30),
+  reservationNotes: text("reservation_notes"), // zobrazí se hostům
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
@@ -182,6 +189,21 @@ export const blogPosts = pgTable("blog_posts", {
   publishedAt: timestamp("published_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const reservations = pgTable("reservations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  restaurantId: uuid("restaurant_id").notNull().references(() => restaurants.id, { onDelete: "cascade" }),
+  guestName: text("guest_name").notNull(),
+  guestEmail: text("guest_email"),
+  guestPhone: text("guest_phone").notNull(),
+  partySize: integer("party_size").notNull(),
+  date: timestamp("date").notNull(),
+  time: text("time").notNull(), // "19:00"
+  note: text("note"),
+  status: text("status").notNull().default("pending"), // 'pending' | 'confirmed' | 'declined' | 'cancelled'
+  adminNote: text("admin_note"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const recipes = pgTable("recipes", {
