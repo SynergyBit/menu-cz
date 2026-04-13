@@ -38,6 +38,7 @@ const sidebarLinks = [
   { href: "/dashboard/happy-hours", label: "Happy Hours", icon: Clock },
   { href: "/dashboard/kupony", label: "Kupóny", icon: FileText },
   { href: "/dashboard/sezonni-menu", label: "Sezónní menu", icon: FileText },
+  { href: "/dashboard/widget", label: "Widget pro web", icon: BarChart3 },
   { href: "/dashboard/zpravy", label: "Zprávy", icon: Mail },
   { href: "/dashboard/analytika", label: "Analytika", icon: BarChart3 },
 ];
