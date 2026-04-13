@@ -28,6 +28,8 @@ import {
   Utensils,
   Users,
   Coffee,
+  Sparkles,
+  Newspaper,
 } from "lucide-react";
 
 const cuisineTypes = [
@@ -259,16 +261,40 @@ export default function HomePage() {
                 href: "/oblibene",
               },
               {
-                icon: UserPlus,
-                title: "Vlastní účet",
-                desc: "Zaregistrujte se a získejte přehled o oblíbených, recenzích a personalizovaná doporučení.",
-                href: "/registrace-host",
+                icon: Sparkles,
+                title: "Akce a události",
+                desc: "Degustace, živá hudba, tematické večery. Podívejte se co se děje v restauracích.",
+                href: "/akce",
               },
               {
-                icon: Smartphone,
-                title: "Funguje na mobilu",
-                desc: "Celá aplikace je optimalizovaná pro telefon. Najděte restauraci cestou z práce.",
-                href: "/restaurace",
+                icon: Clock,
+                title: "Happy Hours",
+                desc: "Sledujte aktuální slevy v restauracích. Countdown do konce — stihněte to!",
+                href: "/happy-hours",
+              },
+              {
+                icon: Newspaper,
+                title: "Novinky a feed",
+                desc: "Co je nového — nové restaurace, akce, recenze, denní menu. Vše na jednom místě.",
+                href: "/novinky",
+              },
+              {
+                icon: BookOpen,
+                title: "Blog o gastronomii",
+                desc: "Tipy kam na jídlo, recepty, rozhovory s kuchaři a průvodce městem.",
+                href: "/blog",
+              },
+              {
+                icon: ChefHat,
+                title: "Kuchařka s recepty",
+                desc: "Recepty krok za krokem — ingredience, postup, fotky. Od předkrmů po dezerty.",
+                href: "/kucharka",
+              },
+              {
+                icon: UserPlus,
+                title: "Vlastní účet",
+                desc: "Oblíbené, recenze, stravovací preference, výchozí město. Vše zdarma.",
+                href: "/registrace-host",
               },
             ].map((f) => (
               <Link key={f.title} href={f.href}>
@@ -358,9 +384,44 @@ export default function HomePage() {
                 badge: "Zdarma",
               },
               {
+                icon: Sparkles,
+                title: "Akce a události",
+                desc: "Nadcházející akce v restauracích — degustace, živá hudba, tematické večery. Filtrujte podle typu a města.",
+                href: "/akce",
+                badge: null,
+              },
+              {
+                icon: Clock,
+                title: "Happy Hours",
+                desc: "Aktuální slevy a akční nabídky. Sledujte které právě probíhají s live countdown.",
+                href: "/happy-hours",
+                badge: "Live",
+              },
+              {
+                icon: Newspaper,
+                title: "Novinky (feed)",
+                desc: "Timeline novinek — nové restaurace, akce, recenze, denní menu. Jako sociální síť pro foodies.",
+                href: "/novinky",
+                badge: null,
+              },
+              {
+                icon: BookOpen,
+                title: "Blog",
+                desc: "Články o gastronomii — tipy kam na jídlo, recepty, rozhovory s kuchaři, průvodce městem.",
+                href: "/blog",
+                badge: null,
+              },
+              {
+                icon: ChefHat,
+                title: "Kuchařka",
+                desc: "Recepty krok za krokem s ingrediencemi, časem přípravy a fotkami. Od snídaní po dezerty.",
+                href: "/kucharka",
+                badge: null,
+              },
+              {
                 icon: QrCode,
                 title: "QR kód v restauraci",
-                desc: "Naskenujte QR kód na stole — otevře se vám menu v mobilu. Uvidíte jídelní lístek, denní menu, otevírací dobu i kontakt. Žádná instalace.",
+                desc: "Naskenujte kód na stole — menu v mobilu. Jídelní lístek, denní menu, kontakt. Žádná aplikace.",
                 href: null,
                 badge: "Bez aplikace",
               },
