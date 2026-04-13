@@ -18,6 +18,7 @@ import {
   CalendarDays,
   Sparkles,
   Newspaper,
+  BookOpen,
   Sun,
   Moon,
   User,
@@ -74,6 +75,7 @@ export function Navbar() {
     { href: "/akce", label: "Akce", icon: Sparkles },
     { href: "/novinky", label: "Novinky", icon: Newspaper },
     { href: "/oblibene", label: "Oblíbené", icon: Heart },
+    { href: "/blog", label: "Blog", icon: BookOpen },
     { href: "/pro-restaurace", label: "Pro restaurace", icon: ChefHat },
   ];
 
