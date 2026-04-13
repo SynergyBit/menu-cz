@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "sonner";
+import { CookieConsent } from "@/components/cookie-consent";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -51,6 +52,7 @@ export default function RootLayout({
         <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
           <TooltipProvider>{children}</TooltipProvider>
           <Toaster position="bottom-right" richColors closeButton />
+          <CookieConsent />
         </ThemeProvider>
       </body>
     </html>

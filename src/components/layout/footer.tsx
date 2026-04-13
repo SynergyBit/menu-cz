@@ -48,8 +48,15 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-10 border-t pt-6 text-center text-xs text-muted-foreground">
-          &copy; {new Date().getFullYear()} Gastroo. Všechna práva vyhrazena.
+        <div className="mt-10 border-t pt-6">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-muted-foreground mb-3">
+            <Link href="/podminky" className="hover:text-foreground transition-colors">Obchodní podmínky</Link>
+            <Link href="/soukromi" className="hover:text-foreground transition-colors">Ochrana osobních údajů</Link>
+            <Link href="/kontakt" className="hover:text-foreground transition-colors">Kontakt</Link>
+          </div>
+          <p className="text-center text-xs text-muted-foreground">
+            &copy; {new Date().getFullYear()} Gastroo — SynergyBit s.r.o., IČO: 23229853
+          </p>
         </div>
       </div>
     </footer>
