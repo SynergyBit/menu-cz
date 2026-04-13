@@ -66,6 +66,11 @@ export default function AdminLayout({
                   Blog
                 </Button>
               </Link>
+              <Link href="/admin/kucharka">
+                <Button variant={pathname.startsWith("/admin/kucharka") ? "secondary" : "ghost"} size="sm">
+                  Kuchařka
+                </Button>
+              </Link>
             </nav>
           </div>
           <div className="flex items-center gap-2">

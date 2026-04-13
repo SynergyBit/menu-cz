@@ -76,6 +76,7 @@ export function Navbar() {
     { href: "/novinky", label: "Novinky", icon: Newspaper },
     { href: "/oblibene", label: "Oblíbené", icon: Heart },
     { href: "/blog", label: "Blog", icon: BookOpen },
+    { href: "/kucharka", label: "Kuchařka", icon: ChefHat },
     { href: "/pro-restaurace", label: "Pro restaurace", icon: ChefHat },
   ];
 

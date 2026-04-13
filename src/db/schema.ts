@@ -184,6 +184,28 @@ export const blogPosts = pgTable("blog_posts", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const recipes = pgTable("recipes", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  description: text("description"),
+  ingredients: text("ingredients").notNull(), // JSON array: [{amount, unit, name}]
+  instructions: text("instructions").notNull(), // HTML postup
+  coverImage: text("cover_image"),
+  category: text("category").notNull().default("hlavni-jidla"),
+  cuisine: text("cuisine"), // česká, italská...
+  difficulty: text("difficulty").notNull().default("stredni"), // snadne, stredni, narocne
+  prepTime: integer("prep_time"), // minuty
+  cookTime: integer("cook_time"), // minuty
+  servings: integer("servings").default(4),
+  tags: text("tags"), // JSON array
+  authorName: text("author_name").notNull().default("Gastroo"),
+  isPublished: boolean("is_published").default(false).notNull(),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const userPreferences = pgTable("user_preferences", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),
