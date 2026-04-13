@@ -214,6 +214,35 @@ export const menuTemplates = pgTable("menu_templates", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const coupons = pgTable("coupons", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  restaurantId: uuid("restaurant_id").notNull().references(() => restaurants.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  code: text("code").notNull(),
+  discountType: text("discount_type").notNull().default("percent"), // 'percent' | 'fixed' | 'freebie'
+  discountValue: text("discount_value"), // "20", "50 Kč", "Dezert zdarma"
+  validFrom: timestamp("valid_from").notNull(),
+  validUntil: timestamp("valid_until").notNull(),
+  maxUses: integer("max_uses"), // null = unlimited
+  currentUses: integer("current_uses").default(0).notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const seasonalMenus = pgTable("seasonal_menus", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  restaurantId: uuid("restaurant_id").notNull().references(() => restaurants.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description"),
+  items: text("items").notNull(), // JSON [{name, description, price}]
+  coverImage: text("cover_image"),
+  validFrom: timestamp("valid_from").notNull(),
+  validUntil: timestamp("valid_until").notNull(),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const recipes = pgTable("recipes", {
   id: uuid("id").defaultRandom().primaryKey(),
   title: text("title").notNull(),

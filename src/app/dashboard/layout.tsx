@@ -36,6 +36,8 @@ const sidebarLinks = [
   { href: "/dashboard/rezervace", label: "Rezervace", icon: CalendarDays },
   { href: "/dashboard/akce", label: "Akce", icon: Sparkles },
   { href: "/dashboard/happy-hours", label: "Happy Hours", icon: Clock },
+  { href: "/dashboard/kupony", label: "Kupóny", icon: FileText },
+  { href: "/dashboard/sezonni-menu", label: "Sezónní menu", icon: FileText },
   { href: "/dashboard/zpravy", label: "Zprávy", icon: Mail },
   { href: "/dashboard/analytika", label: "Analytika", icon: BarChart3 },
 ];
