@@ -8,8 +8,27 @@ if (!jwtSecretRaw) {
 }
 const JWT_SECRET = new TextEncoder().encode(jwtSecretRaw);
 
+const UNSAFE_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // CSRF: for state-changing API calls, require Origin to match Host.
+  // SameSite=Lax on __session already blocks cross-site form POST; this is defense-in-depth.
+  if (pathname.startsWith("/api/") && UNSAFE_METHODS.has(request.method)) {
+    const origin = request.headers.get("origin");
+    const host = request.headers.get("host");
+    if (origin) {
+      try {
+        const originHost = new URL(origin).host;
+        if (host && originHost !== host) {
+          return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
+        }
+      } catch {
+        return NextResponse.json({ error: "Invalid origin" }, { status: 403 });
+      }
+    }
+  }
 
   // Protect dashboard routes
   if (pathname.startsWith("/dashboard")) {
@@ -53,5 +72,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/api/admin/:path*"],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/api/:path*"],
 };
