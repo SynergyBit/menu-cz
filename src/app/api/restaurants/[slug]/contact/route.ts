@@ -26,7 +26,7 @@ export async function POST(
 
   try {
     const ip = request.headers.get("x-forwarded-for") || "unknown";
-    if (!checkRateLimit(`contact:${ip}`, 5, 3600000)) {
+    if (!(await checkRateLimit(`contact:${ip}`, 5, 3600000))) {
       return NextResponse.json({ error: "Příliš mnoho zpráv. Zkuste to později." }, { status: 429 });
     }
 

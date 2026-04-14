@@ -44,7 +44,7 @@ async function translateText(text: string, targetLang: string, sourceLang: strin
 
 export async function POST(request: NextRequest) {
   const ip = request.headers.get("x-forwarded-for") || "unknown";
-  if (!checkRateLimit(`translate:${ip}`, 30, 60000)) { // 30 per minute
+  if (!(await checkRateLimit(`translate:${ip}`, 30, 60000))) { // 30 per minute
     return NextResponse.json({ error: "Příliš mnoho požadavků" }, { status: 429 });
   }
 

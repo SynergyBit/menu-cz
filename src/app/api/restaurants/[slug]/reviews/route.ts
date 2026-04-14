@@ -61,7 +61,7 @@ export async function POST(
 
   try {
     const ip = request.headers.get("x-forwarded-for") || "unknown";
-    if (!checkRateLimit(`review:${ip}`, 5, 3600000)) {
+    if (!(await checkRateLimit(`review:${ip}`, 5, 3600000))) {
       return NextResponse.json({ error: "Příliš mnoho recenzí. Zkuste to později." }, { status: 429 });
     }
 

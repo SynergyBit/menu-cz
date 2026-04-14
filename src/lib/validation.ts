@@ -43,36 +43,6 @@ export function isValidUrl(url: string): boolean {
   }
 }
 
-// Rate limit map (in-memory, per-process)
-const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
-
-export function checkRateLimit(
-  key: string,
-  maxRequests: number,
-  windowMs: number
-): boolean {
-  const now = Date.now();
-  const entry = rateLimitMap.get(key);
-
-  if (!entry || now > entry.resetAt) {
-    rateLimitMap.set(key, { count: 1, resetAt: now + windowMs });
-    return true;
-  }
-
-  if (entry.count >= maxRequests) {
-    return false;
-  }
-
-  entry.count++;
-  return true;
-}
-
-// Clean up old entries periodically
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of rateLimitMap) {
-    if (now > entry.resetAt) {
-      rateLimitMap.delete(key);
-    }
-  }
-}, 60000);
+// Rate limit is now backed by Postgres (distributed across Railway instances).
+// See lib/rate-limit.ts. This re-export keeps existing imports working.
+export { checkRateLimitDb as checkRateLimit } from "@/lib/rate-limit";

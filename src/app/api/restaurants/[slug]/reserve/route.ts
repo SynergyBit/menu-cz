@@ -43,7 +43,7 @@ export async function POST(
   const { slug } = await params;
 
   const ip = request.headers.get("x-forwarded-for") || "unknown";
-  if (!checkRateLimit(`reserve:${ip}`, 5, 3600000)) {
+  if (!(await checkRateLimit(`reserve:${ip}`, 5, 3600000))) {
     return NextResponse.json({ error: "Příliš mnoho pokusů" }, { status: 429 });
   }
 

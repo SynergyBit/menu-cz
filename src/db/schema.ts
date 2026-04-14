@@ -265,6 +265,12 @@ export const recipes = pgTable("recipes", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const rateLimits = pgTable("rate_limits", {
+  key: text("key").primaryKey(),
+  count: integer("count").notNull().default(0),
+  resetAt: timestamp("reset_at").notNull(),
+});
+
 export const userPreferences = pgTable("user_preferences", {
   id: uuid("id").defaultRandom().primaryKey(),
   userId: uuid("user_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),

@@ -12,7 +12,7 @@ export async function PUT(request: NextRequest) {
   }
 
   const ip = request.headers.get("x-forwarded-for") || "unknown";
-  if (!checkRateLimit(`password:${ip}`, 5, 900000)) {
+  if (!(await checkRateLimit(`password:${ip}`, 5, 900000))) {
     return NextResponse.json({ error: "Příliš mnoho pokusů" }, { status: 429 });
   }
 

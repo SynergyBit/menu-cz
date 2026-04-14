@@ -8,7 +8,7 @@ import { sanitize, isValidEmail, isStrongPassword, checkRateLimit } from "@/lib/
 export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get("x-forwarded-for") || "unknown";
-    if (!checkRateLimit(`register-user:${ip}`, 5, 3600000)) {
+    if (!(await checkRateLimit(`register-user:${ip}`, 5, 3600000))) {
       return NextResponse.json({ error: "Příliš mnoho pokusů. Zkuste to později." }, { status: 429 });
     }
 

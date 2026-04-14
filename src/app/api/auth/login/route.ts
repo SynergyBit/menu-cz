@@ -8,7 +8,7 @@ import { sanitize, checkRateLimit } from "@/lib/validation";
 export async function POST(request: NextRequest) {
   try {
     const ip = request.headers.get("x-forwarded-for") || "unknown";
-    if (!checkRateLimit(`login:${ip}`, 10, 900000)) { // 10 attempts per 15min
+    if (!(await checkRateLimit(`login:${ip}`, 10, 900000))) { // 10 attempts per 15min
       return NextResponse.json({ error: "Příliš mnoho pokusů. Zkuste to za 15 minut." }, { status: 429 });
     }
 

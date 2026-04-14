@@ -12,7 +12,7 @@ export async function POST(request: NextRequest) {
       request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
       request.headers.get("x-real-ip") ||
       "unknown";
-    if (!checkRateLimit(`track:${ip}`, 60, 60_000)) {
+    if (!(await checkRateLimit(`track:${ip}`, 60, 60_000))) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
 
