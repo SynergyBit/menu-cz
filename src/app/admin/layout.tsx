@@ -61,6 +61,11 @@ export default function AdminLayout({
                   Uživatelé
                 </Button>
               </Link>
+              <Link href="/admin/prace">
+                <Button variant={pathname.startsWith("/admin/prace") ? "secondary" : "ghost"} size="sm">
+                  Práce
+                </Button>
+              </Link>
               <Link href="/admin/blog">
                 <Button variant={pathname.startsWith("/admin/blog") ? "secondary" : "ghost"} size="sm">
                   Blog

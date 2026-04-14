@@ -16,6 +16,7 @@ import {
   BarChart3,
   Mail,
   Sparkles,
+  Briefcase,
   LogOut,
   ChevronLeft,
   Menu,
@@ -40,6 +41,7 @@ const sidebarLinks = [
   { href: "/dashboard/sezonni-menu", label: "Sezónní menu", icon: FileText },
   { href: "/dashboard/widget", label: "Widget pro web", icon: BarChart3 },
   { href: "/dashboard/zpravy", label: "Zprávy", icon: Mail },
+  { href: "/dashboard/prace", label: "Nabídky práce", icon: Briefcase },
   { href: "/dashboard/analytika", label: "Analytika", icon: BarChart3 },
 ];
 

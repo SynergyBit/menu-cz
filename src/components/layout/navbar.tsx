@@ -19,6 +19,7 @@ import {
   Sparkles,
   Newspaper,
   BookOpen,
+  Briefcase,
   Sun,
   Moon,
   User,
@@ -77,6 +78,7 @@ export function Navbar() {
     { href: "/oblibene", label: "Oblíbené", icon: Heart },
     { href: "/blog", label: "Blog", icon: BookOpen },
     { href: "/kucharka", label: "Kuchařka", icon: ChefHat },
+    { href: "/prace", label: "Práce", icon: Briefcase },
     { href: "/pro-restaurace", label: "Pro restaurace", icon: ChefHat },
   ];
 

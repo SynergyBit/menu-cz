@@ -265,6 +265,31 @@ export const recipes = pgTable("recipes", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const jobOffers = pgTable("job_offers", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  restaurantId: uuid("restaurant_id").notNull().references(() => restaurants.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  position: text("position").notNull(), // kuchař, servírka, pomocný personál, barman, apod.
+  description: text("description").notNull(),
+  employmentType: text("employment_type").notNull(), // "full_time" | "part_time" | "brigada" | "dohoda"
+  city: text("city").notNull(),
+  country: text("country").notNull().default("CZ"), // "CZ" | "SK"
+  salaryFrom: integer("salary_from"), // Kč/EUR
+  salaryTo: integer("salary_to"),
+  salaryCurrency: text("salary_currency").notNull().default("CZK"), // "CZK" | "EUR"
+  salaryPeriod: text("salary_period").notNull().default("month"), // "hour" | "month"
+  contactEmail: text("contact_email"),
+  contactPhone: text("contact_phone"),
+  requirements: text("requirements"),
+  benefits: text("benefits"),
+  isActive: boolean("is_active").default(true).notNull(),
+  isApproved: boolean("is_approved").default(true).notNull(),
+  isFeatured: boolean("is_featured").default(false).notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const rateLimits = pgTable("rate_limits", {
   key: text("key").primaryKey(),
   count: integer("count").notNull().default(0),

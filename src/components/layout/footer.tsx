@@ -29,6 +29,7 @@ export function Footer() {
               <li><Link href="/happy-hours" className="hover:text-foreground transition-colors">Happy Hours</Link></li>
               <li><Link href="/blog" className="hover:text-foreground transition-colors">Blog</Link></li>
               <li><Link href="/kucharka" className="hover:text-foreground transition-colors">Kuchařka</Link></li>
+              <li><Link href="/prace" className="hover:text-foreground transition-colors">Práce v gastru</Link></li>
             </ul>
           </div>
 
@@ -38,6 +39,7 @@ export function Footer() {
               <li><Link href="/pro-restaurace" className="hover:text-foreground transition-colors">Proč Gastroo</Link></li>
               <li><Link href="/qr-menu" className="hover:text-foreground transition-colors">QR Menu</Link></li>
               <li><Link href="/cenik" className="hover:text-foreground transition-colors">Ceník</Link></li>
+              <li><Link href="/prace" className="hover:text-foreground transition-colors">Nabídky práce</Link></li>
               <li><Link href="/registrace" className="hover:text-foreground transition-colors">Registrace restaurace</Link></li>
             </ul>
           </div>
