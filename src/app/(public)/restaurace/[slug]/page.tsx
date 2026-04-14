@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { StarRating, RatingBadge } from "@/components/star-rating";
 import { AllergenBadges, DietaryFilterChips } from "@/components/allergen-badge";
+import { addRecentRestaurant } from "@/lib/recent-restaurants";
 import { parseAllergens, dietaryFilters } from "@/lib/allergens";
 import { getEventType } from "@/lib/event-types";
 import { FavoriteButton } from "@/components/favorite-button";
@@ -188,7 +189,19 @@ export default function RestaurantDetailPage({
   useEffect(() => {
     fetch(`/api/restaurants/${slug}`)
       .then((r) => (r.ok ? r.json() : null))
-      .then(setData)
+      .then((d) => {
+        setData(d);
+        if (d?.restaurant) {
+          addRecentRestaurant({
+            id: d.restaurant.id,
+            name: d.restaurant.name,
+            slug: d.restaurant.slug,
+            city: d.restaurant.city,
+            cuisineType: d.restaurant.cuisineType,
+            logoUrl: d.restaurant.logoUrl,
+          });
+        }
+      })
       .catch(() => setData(null))
       .finally(() => setLoading(false));
 

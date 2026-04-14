@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { SearchBar } from "@/components/search-bar";
 import { FeaturedRestaurants } from "@/components/featured-restaurants";
 import { CityLinks } from "@/components/city-links";
+import { RecentRestaurants } from "@/components/recent-restaurants";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -337,6 +338,13 @@ export default function HomePage() {
               </Button>
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* ======= NAPOSLEDY ZOBRAZENÉ ======= */}
+      <section className="py-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <RecentRestaurants />
         </div>
       </section>
 
