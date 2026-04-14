@@ -6,6 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { LanguageSelector } from "@/components/language-selector";
+import { useTranslation } from "@/hooks/use-translation";
 import {
   UtensilsCrossed,
   Phone,
@@ -88,6 +90,7 @@ export default function MobilePage({
     openingHours: OpeningHour[];
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const { currentLang, translating, translateTexts, t } = useTranslation();
 
   useEffect(() => {
     fetch(`/api/restaurants/${slug}`)
@@ -158,6 +161,18 @@ export default function MobilePage({
               <p className="text-xs text-muted-foreground truncate">{r.tagline}</p>
             )}
           </div>
+          <LanguageSelector
+            currentLang={currentLang}
+            translating={translating}
+            compact
+            onSelectLanguage={(lang) => {
+              if (lang === "cs") { translateTexts([], "cs"); return; }
+              const texts: string[] = [];
+              menu.forEach((cat) => { texts.push(cat.name); cat.items.forEach((i) => { texts.push(i.name); if (i.description) texts.push(i.description); }); });
+              if (dailyMenu) dailyMenu.items.forEach((i) => { texts.push(i.name); if (i.description) texts.push(i.description); });
+              translateTexts(texts, lang);
+            }}
+          />
           {isOpen ? (
             <Badge className="bg-green-500 text-white shrink-0 text-xs">Otevřeno</Badge>
           ) : (
@@ -226,9 +241,9 @@ export default function MobilePage({
                     <div className="flex items-center gap-2.5 min-w-0">
                       <Icon className="h-4 w-4 shrink-0 text-primary" />
                       <div className="min-w-0">
-                        <p className="text-sm font-medium truncate">{item.name}</p>
+                        <p className="text-sm font-medium truncate">{t(item.name)}</p>
                         {item.description && (
-                          <p className="text-xs text-muted-foreground truncate">{item.description}</p>
+                          <p className="text-xs text-muted-foreground truncate">{t(item.description)}</p>
                         )}
                       </div>
                     </div>
@@ -253,7 +268,7 @@ export default function MobilePage({
               {menu.map((cat) => (
                 <div key={cat.id}>
                   <h3 className="mb-2 text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                    {cat.name}
+                    {t(cat.name)}
                   </h3>
                   <div className="space-y-1">
                     {cat.items.filter((i) => i.isAvailable).map((item) => (
@@ -262,9 +277,9 @@ export default function MobilePage({
                         className="flex items-start justify-between py-2"
                       >
                         <div className="min-w-0 pr-3">
-                          <p className="text-sm font-medium">{item.name}</p>
+                          <p className="text-sm font-medium">{t(item.name)}</p>
                           {item.description && (
-                            <p className="text-xs text-muted-foreground">{item.description}</p>
+                            <p className="text-xs text-muted-foreground">{t(item.description)}</p>
                           )}
                         </div>
                         <span className="shrink-0 text-sm font-semibold text-primary">

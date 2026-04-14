@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label";
 import { StarRating, RatingBadge } from "@/components/star-rating";
 import { AllergenBadges, DietaryFilterChips } from "@/components/allergen-badge";
 import { addRecentRestaurant } from "@/lib/recent-restaurants";
+import { LanguageSelector } from "@/components/language-selector";
+import { useTranslation } from "@/hooks/use-translation";
 import { parseAllergens, dietaryFilters } from "@/lib/allergens";
 import { getEventType } from "@/lib/event-types";
 import { FavoriteButton } from "@/components/favorite-button";
@@ -179,6 +181,7 @@ export default function RestaurantDetailPage({
     available: boolean; minHoursAhead: number; maxDaysAhead: number;
     maxPartySize: number; slotMinutes: number; notes: string | null;
   } | null>(null);
+  const { currentLang, translating, translateTexts, t } = useTranslation();
   const [activeHappyHour, setActiveHappyHour] = useState<{ title: string; discount: string | null; startTime: string; endTime: string; isActiveNow: boolean; minutesRemaining: number | null } | null>(null);
   const [restaurantEvents, setRestaurantEvents] = useState<{ id: string; title: string; eventDate: string; eventTime: string | null; eventType: string }[]>([]);
   const [weeklyMenu, setWeeklyMenu] = useState<{ date: string; dayName: string; items: { id: string; name: string; description: string | null; price: string; type: string }[] }[]>([]);
@@ -335,6 +338,37 @@ export default function RestaurantDetailPage({
           </Button>
         </Link>
         <div className="flex items-center gap-2">
+          {hasPaidPlan && (
+            <LanguageSelector
+              currentLang={currentLang}
+              translating={translating}
+              compact
+              onSelectLanguage={(lang) => {
+                if (lang === "cs") {
+                  translateTexts([], "cs");
+                  return;
+                }
+                // Collect all translatable texts
+                const texts: string[] = [];
+                if (r.description) texts.push(r.description);
+                if (r.tagline) texts.push(r.tagline);
+                menu.forEach((cat) => {
+                  texts.push(cat.name);
+                  cat.items.forEach((item) => {
+                    texts.push(item.name);
+                    if (item.description) texts.push(item.description);
+                  });
+                });
+                if (dailyMenu) {
+                  dailyMenu.items.forEach((item) => {
+                    texts.push(item.name);
+                    if (item.description) texts.push(item.description);
+                  });
+                }
+                translateTexts(texts, lang);
+              }}
+            />
+          )}
           <FavoriteButton restaurantId={r.id} />
           <Button variant="ghost" size="sm" className="gap-2" onClick={handleShare}>
             <Share2 className="h-4 w-4" />
@@ -410,7 +444,7 @@ export default function RestaurantDetailPage({
 
       {/* Description */}
       {r.description && hasPaidPlan && (
-        <p className="mb-6 text-muted-foreground leading-relaxed">{r.description}</p>
+        <p className="mb-6 text-muted-foreground leading-relaxed">{t(r.description)}</p>
       )}
 
       {/* ===== HAPPY HOUR BANNER ===== */}
@@ -719,9 +753,9 @@ export default function RestaurantDetailPage({
                           <span className="text-xs font-medium text-muted-foreground">
                             {typeLabels[item.type] || item.type}
                           </span>
-                          <p className="font-medium">{item.name}</p>
+                          <p className="font-medium">{t(item.name)}</p>
                           {item.description && (
-                            <p className="text-sm text-muted-foreground">{item.description}</p>
+                            <p className="text-sm text-muted-foreground">{t(item.description)}</p>
                           )}
                         </div>
                       </div>
@@ -789,7 +823,7 @@ export default function RestaurantDetailPage({
               <Card key={cat.id}>
                 <CardHeader>
                   <CardTitle>
-                    {cat.name}
+                    {t(cat.name)}
                     {excludeAllergens.length > 0 && filteredItems.length !== cat.items.length && (
                       <span className="ml-2 text-xs font-normal text-muted-foreground">
                         ({filteredItems.length} z {cat.items.length})
@@ -804,13 +838,13 @@ export default function RestaurantDetailPage({
                       <div className="flex items-start justify-between gap-4 py-2">
                         <div>
                           <p className="font-medium">
-                            {item.name}
+                            {t(item.name)}
                             {!item.isAvailable && (
                               <Badge variant="secondary" className="ml-2 text-xs">Nedostupné</Badge>
                             )}
                           </p>
                           {item.description && (
-                            <p className="text-sm text-muted-foreground">{item.description}</p>
+                            <p className="text-sm text-muted-foreground">{t(item.description)}</p>
                           )}
                           {item.allergens && hasPaidPlan && (
                             <AllergenBadges allergenStr={item.allergens} />
