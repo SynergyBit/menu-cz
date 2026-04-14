@@ -18,18 +18,20 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Gastroo — Najdi restauraci, prohlédni si menu",
+    default: "Gastroo — Restaurace a kavárny v ČR a SR",
     template: "%s | Gastroo",
   },
   description:
-    "Interaktivní vyhledávač restaurací. Prohlédni si jídelní lístek, denní menu a otevírací dobu restaurací ve tvém okolí.",
+    "Vyhledávač restaurací a kaváren v České republice a na Slovensku. Jídelní lístky, denní menu, káva, dezerty, rezervace a recenze na jednom místě.",
   manifest: "/manifest.json",
   openGraph: {
     type: "website",
     locale: "cs_CZ",
+    alternateLocale: ["sk_SK"],
     siteName: "Gastroo",
-    title: "Gastroo — Vyhledávač restaurací",
-    description: "Prohlédněte si jídelní lístek, denní menu a najděte svou oblíbenou restauraci.",
+    title: "Gastroo — Restaurace a kavárny v ČR a SR",
+    description:
+      "Menu, denní nabídky, káva i dezerty — restaurace a kavárny ve vašem okolí v ČR i na Slovensku.",
   },
   robots: {
     index: true,

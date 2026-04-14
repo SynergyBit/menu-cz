@@ -35,12 +35,14 @@ import {
 
 const cuisineTypes = [
   { label: "Česká", emoji: "🇨🇿" },
+  { label: "Slovenská", emoji: "🇸🇰" },
   { label: "Italská", emoji: "🇮🇹" },
   { label: "Asijská", emoji: "🥢" },
+  { label: "Kavárna", emoji: "☕" },
+  { label: "Cukrárna", emoji: "🧁" },
   { label: "Vegetariánská", emoji: "🥬" },
   { label: "Bezlepková", emoji: "🌾" },
   { label: "Fast food", emoji: "🍔" },
-  { label: "Kavárna", emoji: "☕" },
 ];
 
 export default function HomePage() {
@@ -65,10 +67,18 @@ export default function HomePage() {
         <div className="relative mx-auto w-full max-w-7xl px-4 py-20 sm:px-6 sm:py-28">
           <div className="mx-auto max-w-3xl text-center">
             {/* Pill badge */}
-            <div className="mb-8 inline-flex items-center gap-2 rounded-full border bg-card/80 backdrop-blur-sm px-4 py-2 text-sm shadow-sm">
+            <div className="mb-8 inline-flex flex-wrap items-center justify-center gap-2 rounded-full border bg-card/80 backdrop-blur-sm px-4 py-2 text-sm shadow-sm">
               <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse" />
               <span className="text-muted-foreground">
-                <span className="font-semibold text-foreground">{stats.restaurants || "..."}</span> restaurací s aktuálním menu
+                <span className="font-semibold text-foreground">{stats.restaurants || "..."}</span> restaurací a kaváren s aktuálním menu
+              </span>
+              <span className="hidden sm:inline text-border">·</span>
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-foreground">
+                <span>🇨🇿</span>
+                <span>ČR</span>
+                <span className="text-muted-foreground">+</span>
+                <span>🇸🇰</span>
+                <span>SR</span>
               </span>
             </div>
 
@@ -77,7 +87,7 @@ export default function HomePage() {
               <br />
               <span className="relative inline-block">
                 <span className="bg-gradient-to-r from-primary via-primary to-primary/60 bg-clip-text text-transparent">
-                  poobědváte?
+                  posedíte?
                 </span>
                 <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 300 8" fill="none">
                   <path d="M2 6c50-5 100-5 150-2s100 3 146-1" stroke="oklch(0.55 0.18 30)" strokeWidth="3" strokeLinecap="round" opacity="0.25" />
@@ -85,9 +95,9 @@ export default function HomePage() {
               </span>
             </h1>
 
-            <p className="mx-auto mt-8 max-w-lg text-lg text-muted-foreground leading-relaxed sm:text-xl">
-              Menu, denní nabídky a recenze restaurací ve vašem okolí.
-              Vyberte si jídlo, ne restauraci naslepo.
+            <p className="mx-auto mt-8 max-w-xl text-lg text-muted-foreground leading-relaxed sm:text-xl">
+              Menu, denní nabídky, káva i dezerty — restaurace a kavárny ve vašem okolí
+              v České republice i na Slovensku. Vyberte si podle jídla, ne naslepo.
             </p>
 
             {/* Search */}
@@ -137,19 +147,22 @@ export default function HomePage() {
           <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3 text-sm text-muted-foreground">
             <span className="flex items-center gap-2">
               <UtensilsCrossed className="h-4 w-4 text-primary" />
-              <strong className="text-foreground">{stats.restaurants || "..."}+</strong> restaurací
+              <strong className="text-foreground">{stats.restaurants || "..."}+</strong> restaurací a kaváren
             </span>
             <span className="flex items-center gap-2">
               <BookOpen className="h-4 w-4 text-primary" />
-              <strong className="text-foreground">{stats.menuItems || "..."}+</strong> jídel v menu
+              <strong className="text-foreground">{stats.menuItems || "..."}+</strong> jídel a nápojů
             </span>
             <span className="flex items-center gap-2">
               <Star className="h-4 w-4 text-primary" />
               <strong className="text-foreground">{stats.reviews || "..."}+</strong> recenzí
             </span>
-            <span className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-primary" />
-              <strong className="text-foreground">{stats.users || "..."}+</strong> uživatelů
+            <span className="flex items-center gap-2 text-foreground">
+              <span>🇨🇿</span>
+              <span className="font-semibold">ČR</span>
+              <span className="text-muted-foreground">+</span>
+              <span>🇸🇰</span>
+              <span className="font-semibold">SR</span>
             </span>
           </div>
         </div>
@@ -161,7 +174,7 @@ export default function HomePage() {
           <div className="mb-12 text-center">
             <Badge variant="outline" className="mb-4">Jak to funguje</Badge>
             <h2 className="text-3xl font-bold sm:text-4xl">
-              Najděte restauraci ve 3 krocích
+              Najděte restauraci nebo kavárnu ve 3 krocích
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-muted-foreground">
               Žádná registrace, žádná aplikace ke stažení. Stačí otevřít prohlížeč.
@@ -213,8 +226,11 @@ export default function HomePage() {
           <div className="mb-12 text-center">
             <Badge variant="outline" className="mb-4">Funkce pro vás</Badge>
             <h2 className="text-3xl font-bold sm:text-4xl">
-              Vše co potřebujete vědět o restauraci
+              Vše o restauracích i kavárnách
             </h2>
+            <p className="mx-auto mt-3 max-w-lg text-muted-foreground">
+              Od obědového menu přes kávu a dezerty po rezervace — na Gastroo najdete vše, co potřebujete vědět před návštěvou.
+            </p>
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
@@ -222,7 +238,7 @@ export default function HomePage() {
               {
                 icon: Utensils,
                 title: "Jídelní lístky online",
-                desc: "Kompletní menu s cenami, popisem jídel a alergeny. Vyberte si ještě před příchodem.",
+                desc: "Kompletní menu s cenami, popisem jídel, nápojů a alergeny. Vyberte si ještě před příchodem.",
                 href: "/restaurace",
               },
               {
@@ -317,7 +333,8 @@ export default function HomePage() {
       {/* ======= RESTAURACE PODLE MĚSTA ======= */}
       <section className="py-12">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <h3 className="mb-4 text-center text-lg font-semibold">Restaurace podle města</h3>
+          <h3 className="mb-4 text-center text-lg font-semibold">Restaurace a kavárny podle města</h3>
+          <p className="mb-6 text-center text-sm text-muted-foreground">Česká republika i Slovensko</p>
           <CityLinks />
         </div>
       </section>
@@ -326,8 +343,8 @@ export default function HomePage() {
       <section className="bg-muted/30 py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="mb-8 text-center">
-            <h2 className="text-2xl font-bold sm:text-3xl">Objevte restaurace</h2>
-            <p className="mt-3 text-muted-foreground">Nejlépe hodnocené, s denním menu a nově přidané</p>
+            <h2 className="text-2xl font-bold sm:text-3xl">Objevte restaurace a kavárny</h2>
+            <p className="mt-3 text-muted-foreground">Nejlépe hodnocené, s denním menu a nově přidané — z celé ČR i Slovenska</p>
           </div>
           <FeaturedRestaurants />
           <div className="mt-8 text-center">
@@ -499,11 +516,11 @@ export default function HomePage() {
               </div>
               <div>
                 <h2 className="text-2xl font-bold sm:text-3xl">
-                  Provozujete restauraci?
+                  Provozujete restauraci nebo kavárnu?
                 </h2>
                 <p className="mx-auto mt-3 max-w-lg text-primary-foreground/80">
-                  Dejte vašemu menu moderní podobu. QR kódy, denní menu, profil restaurace
-                  a statistiky — začněte zdarma.
+                  Dejte vašemu menu moderní podobu. QR kódy, denní menu, nápojový lístek,
+                  profil a statistiky — začněte zdarma. K dispozici v ČR i na Slovensku.
                 </p>
               </div>
               <div className="flex gap-3">
