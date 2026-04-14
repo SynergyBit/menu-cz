@@ -128,6 +128,12 @@ const features = [
     title: "Export menu jako PDF",
     description: "Stáhněte jídelní lístek jako tisknutelné PDF s logem, cenami a alergeny.",
   },
+  {
+    icon: Globe,
+    title: "Překlad menu do 20 jazyků",
+    description: "Turista naskenuje QR kód a přeloží si menu do svého jazyka. 20 jazyků včetně angličtiny, němčiny, čínštiny.",
+    highlight: true,
+  },
 ];
 
 const benefits = [

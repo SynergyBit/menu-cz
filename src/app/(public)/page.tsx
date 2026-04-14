@@ -252,8 +252,8 @@ export default function HomePage() {
               {
                 icon: QrCode,
                 title: "QR kód v restauraci",
-                desc: "Naskenujte QR kód na stole a menu se vám zobrazí přímo v mobilu. Žádná aplikace.",
-                href: "/restaurace",
+                desc: "Naskenujte QR kód a menu se zobrazí v mobilu. Přeložte si ho do 20 jazyků jedním klikem.",
+                href: "/qr-menu",
               },
               {
                 icon: Heart,
@@ -429,9 +429,9 @@ export default function HomePage() {
               {
                 icon: QrCode,
                 title: "QR kód v restauraci",
-                desc: "Naskenujte kód na stole — menu v mobilu. Jídelní lístek, denní menu, kontakt. Žádná aplikace.",
-                href: null,
-                badge: "Bez aplikace",
+                desc: "Naskenujte kód na stole — menu v mobilu. Přeložte do 20 jazyků. Bez aplikace.",
+                href: "/qr-menu",
+                badge: "20 jazyků",
               },
             ].map((item) => (
               <Card key={item.title} className="transition-all hover:shadow-md">

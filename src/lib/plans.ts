@@ -74,6 +74,7 @@ export const features: PlanFeature[] = [
   { key: "theme", label: "Vlastní barva vizitky", free: false, standard: false, premium: true },
   { key: "featured", label: "Zvýrazněná pozice ve výsledcích", free: false, standard: false, premium: true },
   { key: "analytics", label: "Statistiky a analytika", free: false, standard: false, premium: true },
+  { key: "translation", label: "Překlad menu do 20 jazyků", free: false, standard: false, premium: "20 jazyků" },
 ];
 
 export function getPlan(planId: string): Plan {

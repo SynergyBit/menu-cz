@@ -62,6 +62,11 @@ const benefits = [
     title: "Dostupné odkudkoliv",
     description: "Menu není jen na stole. Hosté si ho prohlédnou z domu, z ulice, nebo ze sociálních sítí. Jeden odkaz pro všechny.",
   },
+  {
+    icon: Globe,
+    title: "Překlad do 20 jazyků",
+    description: "Turista naskenuje QR kód a jedním klikem si přeloží celé menu do svého jazyka. Angličtina, němčina, čínština a dalších 17.",
+  },
 ];
 
 const features = [
@@ -75,6 +80,7 @@ const features = [
   { text: "Funguje na jakémkoliv telefonu s fotoaparátem" },
   { text: "Žádná instalace aplikace" },
   { text: "Načtení do 2 sekund" },
+  { text: "Překlad menu do 20 jazyků jedním klikem" },
 ];
 
 const designFeatures = [
