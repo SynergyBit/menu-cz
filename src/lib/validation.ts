@@ -11,8 +11,14 @@ export function isValidEmail(email: string): boolean {
 
 // Password strength
 export function isStrongPassword(password: string): { valid: boolean; message: string } {
-  if (password.length < 6) {
-    return { valid: false, message: "Heslo musí mít alespoň 6 znaků" };
+  if (password.length < 8) {
+    return { valid: false, message: "Heslo musí mít alespoň 8 znaků" };
+  }
+  if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+    return {
+      valid: false,
+      message: "Heslo musí obsahovat alespoň jedno písmeno a jednu číslici",
+    };
   }
   if (password.length > 128) {
     return { valid: false, message: "Heslo je příliš dlouhé" };

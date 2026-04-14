@@ -4,6 +4,7 @@ import { photos, restaurants } from "@/db/schema";
 import { getSession } from "@/lib/auth";
 import { eq, and } from "drizzle-orm";
 import { getPhotoLimit } from "@/lib/plans";
+import { validateImageBuffer, mimeFromFormat } from "@/lib/image-validation";
 
 export async function GET() {
   const session = await getSession();
@@ -56,17 +57,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Žádný soubor" }, { status: 400 });
     }
 
-    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      return NextResponse.json({ error: "Povolené formáty: JPEG, PNG, WebP" }, { status: 400 });
-    }
-
     if (file.size > 2 * 1024 * 1024) {
       return NextResponse.json({ error: "Max 2 MB" }, { status: 400 });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+    const validation = await validateImageBuffer(buffer, ["jpeg", "png", "webp"]);
+    if (!validation.ok) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
+    }
     const base64 = buffer.toString("base64");
-    const dataUrl = `data:${file.type};base64,${base64}`;
+    const dataUrl = `data:${mimeFromFormat(validation.format)};base64,${base64}`;
 
     const [photo] = await db
       .insert(photos)

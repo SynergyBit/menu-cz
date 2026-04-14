@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
+import { validateImageBuffer, mimeFromFormat } from "@/lib/image-validation";
 
 export async function POST(request: NextRequest) {
   const session = await getSession();
@@ -15,17 +16,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Žádný soubor" }, { status: 400 });
     }
 
-    if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
-      return NextResponse.json({ error: "Povolené formáty: JPEG, PNG, WebP, GIF" }, { status: 400 });
-    }
-
     if (file.size > 3 * 1024 * 1024) {
       return NextResponse.json({ error: "Max 3 MB" }, { status: 400 });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+    const validation = await validateImageBuffer(buffer, ["jpeg", "png", "webp", "gif"]);
+    if (!validation.ok) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
+    }
     const base64 = buffer.toString("base64");
-    const dataUrl = `data:${file.type};base64,${base64}`;
+    const dataUrl = `data:${mimeFromFormat(validation.format)};base64,${base64}`;
 
     return NextResponse.json({ url: dataUrl });
   } catch (error) {

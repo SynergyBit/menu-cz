@@ -3,9 +3,9 @@ import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { restaurants } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { validateImageBuffer, mimeFromFormat } from "@/lib/image-validation";
 
 const MAX_SIZE = 2 * 1024 * 1024; // 2MB
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export async function POST(request: NextRequest) {
   const session = await getSession();
@@ -20,13 +20,6 @@ export async function POST(request: NextRequest) {
 
     if (!file) {
       return NextResponse.json({ error: "Žádný soubor" }, { status: 400 });
-    }
-
-    if (!ALLOWED_TYPES.includes(file.type)) {
-      return NextResponse.json(
-        { error: "Povolené formáty: JPEG, PNG, WebP" },
-        { status: 400 }
-      );
     }
 
     if (file.size > MAX_SIZE) {
@@ -44,8 +37,12 @@ export async function POST(request: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
+    const validation = await validateImageBuffer(buffer, ["jpeg", "png", "webp"]);
+    if (!validation.ok) {
+      return NextResponse.json({ error: validation.error }, { status: 400 });
+    }
     const base64 = buffer.toString("base64");
-    const dataUrl = `data:${file.type};base64,${base64}`;
+    const dataUrl = `data:${mimeFromFormat(validation.format)};base64,${base64}`;
 
     const updateField = type === "logo" ? { logoUrl: dataUrl } : { coverUrl: dataUrl };
     await db

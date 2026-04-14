@@ -2,14 +2,29 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { pageViews, restaurants } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { checkRateLimit } from "@/lib/validation";
+
+const ALLOWED_VIEW_TYPES = new Set(["page", "phone", "web", "menu", "qr"]);
 
 export async function POST(request: NextRequest) {
   try {
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0].trim() ||
+      request.headers.get("x-real-ip") ||
+      "unknown";
+    if (!checkRateLimit(`track:${ip}`, 60, 60_000)) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+    }
+
     const { slug, viewType } = await request.json();
 
-    if (!slug) {
+    if (!slug || typeof slug !== "string" || slug.length > 200) {
       return NextResponse.json({ error: "Missing slug" }, { status: 400 });
     }
+    const safeViewType =
+      typeof viewType === "string" && ALLOWED_VIEW_TYPES.has(viewType)
+        ? viewType
+        : "page";
 
     const [restaurant] = await db
       .select({ id: restaurants.id })
@@ -23,7 +38,7 @@ export async function POST(request: NextRequest) {
 
     await db.insert(pageViews).values({
       restaurantId: restaurant.id,
-      viewType: viewType || "page",
+      viewType: safeViewType,
     });
 
     return NextResponse.json({ success: true });
