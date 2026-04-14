@@ -65,6 +65,19 @@ export async function POST(
       return NextResponse.json({ error: "Jméno, telefon, datum, čas a počet osob jsou povinné" }, { status: 400 });
     }
 
+    if (guestName.length > 100 || guestPhone.length > 20 || (guestEmail && guestEmail.length > 254) || (note && note.length > 1000)) {
+      return NextResponse.json({ error: "Příliš dlouhé hodnoty" }, { status: 400 });
+    }
+
+    if (!/^\d{2}:\d{2}$/.test(body.time)) {
+      return NextResponse.json({ error: "Neplatný formát času" }, { status: 400 });
+    }
+
+    const partySize = Number(body.partySize);
+    if (isNaN(partySize) || partySize < 1 || partySize > 50) {
+      return NextResponse.json({ error: "Neplatný počet osob" }, { status: 400 });
+    }
+
     const [reservation] = await db.insert(reservations).values({
       restaurantId: restaurant.id,
       guestName,

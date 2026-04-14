@@ -55,10 +55,18 @@ export async function POST(request: NextRequest) {
 
     const hashedPassword = await hashPassword(password);
 
-    const [user] = await db
-      .insert(users)
-      .values({ email, password: hashedPassword, name, role: "restaurant" })
-      .returning();
+    let user;
+    try {
+      [user] = await db
+        .insert(users)
+        .values({ email, password: hashedPassword, name, role: "restaurant" })
+        .returning();
+    } catch (err: unknown) {
+      if (err instanceof Error && err.message.includes("unique")) {
+        return NextResponse.json({ error: "Email je již registrován" }, { status: 409 });
+      }
+      throw err;
+    }
 
     let slug = generateSlug(restaurantName);
     const existingSlug = await db.select().from(restaurants).where(eq(restaurants.slug, slug)).limit(1);

@@ -21,10 +21,14 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="mb-3 text-sm font-semibold">Pro hosty</h3>
+            <h3 className="mb-3 text-sm font-semibold">Objevte</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/restaurace" className="hover:text-foreground transition-colors">Najít restauraci</Link></li>
+              <li><Link href="/restaurace" className="hover:text-foreground transition-colors">Restaurace</Link></li>
               <li><Link href="/dnes" className="hover:text-foreground transition-colors">Denní menu dnes</Link></li>
+              <li><Link href="/akce" className="hover:text-foreground transition-colors">Akce</Link></li>
+              <li><Link href="/happy-hours" className="hover:text-foreground transition-colors">Happy Hours</Link></li>
+              <li><Link href="/blog" className="hover:text-foreground transition-colors">Blog</Link></li>
+              <li><Link href="/kucharka" className="hover:text-foreground transition-colors">Kuchařka</Link></li>
             </ul>
           </div>
 
@@ -33,17 +37,17 @@ export function Footer() {
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link href="/pro-restaurace" className="hover:text-foreground transition-colors">Proč Gastroo</Link></li>
               <li><Link href="/cenik" className="hover:text-foreground transition-colors">Ceník</Link></li>
-              <li><Link href="/registrace" className="hover:text-foreground transition-colors">Registrace</Link></li>
-              <li><Link href="/prihlaseni" className="hover:text-foreground transition-colors">Přihlášení</Link></li>
+              <li><Link href="/registrace" className="hover:text-foreground transition-colors">Registrace restaurace</Link></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="mb-3 text-sm font-semibold">Pro hosty</h3>
+            <h3 className="mb-3 text-sm font-semibold">Účet</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link href="/dnes" className="hover:text-foreground transition-colors">Denní menu dnes</Link></li>
               <li><Link href="/registrace-host" className="hover:text-foreground transition-colors">Vytvořit účet</Link></li>
+              <li><Link href="/prihlaseni" className="hover:text-foreground transition-colors">Přihlášení</Link></li>
               <li><Link href="/oblibene" className="hover:text-foreground transition-colors">Oblíbené</Link></li>
+              <li><Link href="/novinky" className="hover:text-foreground transition-colors">Novinky</Link></li>
             </ul>
           </div>
         </div>
