@@ -36,6 +36,7 @@ export function Footer() {
             <h3 className="mb-3 text-sm font-semibold">Pro restaurace</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li><Link href="/pro-restaurace" className="hover:text-foreground transition-colors">Proč Gastroo</Link></li>
+              <li><Link href="/qr-menu" className="hover:text-foreground transition-colors">QR Menu</Link></li>
               <li><Link href="/cenik" className="hover:text-foreground transition-colors">Ceník</Link></li>
               <li><Link href="/registrace" className="hover:text-foreground transition-colors">Registrace restaurace</Link></li>
             </ul>
