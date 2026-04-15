@@ -290,6 +290,33 @@ export const jobOffers = pgTable("job_offers", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const jobSeekers = pgTable("job_seekers", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  position: text("position").notNull(),
+  headline: text("headline").notNull(), // krátké shrnutí "Servírka s 5 lety praxe, Praha 1"
+  description: text("description").notNull(),
+  employmentType: text("employment_type").notNull(), // full_time | part_time | brigada | dohoda
+  city: text("city").notNull(),
+  country: text("country").notNull().default("CZ"),
+  yearsExperience: integer("years_experience"),
+  expectedSalaryFrom: integer("expected_salary_from"),
+  expectedSalaryCurrency: text("expected_salary_currency").notNull().default("CZK"),
+  expectedSalaryPeriod: text("expected_salary_period").notNull().default("month"),
+  availableFrom: timestamp("available_from"),
+  contactEmail: text("contact_email").notNull(),
+  contactPhone: text("contact_phone"),
+  skills: text("skills"), // krátký seznam oddělený čárkami
+  languages: text("languages"), // "CZ, EN, DE"
+  isActive: boolean("is_active").default(true).notNull(),
+  isApproved: boolean("is_approved").default(false).notNull(), // admin moderace proti spamu
+  isFeatured: boolean("is_featured").default(false).notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const rateLimits = pgTable("rate_limits", {
   key: text("key").primaryKey(),
   count: integer("count").notNull().default(0),

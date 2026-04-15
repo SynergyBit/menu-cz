@@ -182,10 +182,17 @@ export default function DashboardJobsPage() {
             Publikujte nabídky pro kuchaře, servírky i brigádníky — <strong>zdarma</strong>.
           </p>
         </div>
-        <Button onClick={openCreate} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Nový inzerát
-        </Button>
+        <div className="flex gap-2">
+          <Link href="/prace?tab=seekers" target="_blank">
+            <Button variant="outline" className="gap-2">
+              Procházet uchazeče
+            </Button>
+          </Link>
+          <Button onClick={openCreate} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Nový inzerát
+          </Button>
+        </div>
       </div>
 
       {loading ? (

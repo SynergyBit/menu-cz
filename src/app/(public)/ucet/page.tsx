@@ -183,10 +183,17 @@ export default function AccountPage() {
             <p className="text-sm text-muted-foreground">{user.email}</p>
           </div>
         </div>
-        <Button variant="ghost" size="sm" className="gap-2" onClick={handleLogout}>
-          <LogOut className="h-4 w-4" />
-          Odhlásit
-        </Button>
+        <div className="flex items-center gap-2">
+          <Link href="/ucet/poptavky">
+            <Button variant="outline" size="sm" className="gap-2">
+              Moje poptávky práce
+            </Button>
+          </Link>
+          <Button variant="ghost" size="sm" className="gap-2" onClick={handleLogout}>
+            <LogOut className="h-4 w-4" />
+            Odhlásit
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="favorites">

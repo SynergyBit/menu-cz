@@ -33,6 +33,17 @@ export function getEmploymentLabel(type: string): string {
   return EMPLOYMENT_TYPES.find((t) => t.value === type)?.label || type;
 }
 
+export function formatExpectedSalary(
+  from: number | null,
+  currency: string,
+  period: string,
+): string | null {
+  if (!from) return null;
+  const suffix = period === "hour" ? "/hod" : "/měsíc";
+  const cur = currency === "EUR" ? "€" : "Kč";
+  return `od ${from.toLocaleString("cs")} ${cur}${suffix}`;
+}
+
 export function formatSalary(
   from: number | null,
   to: number | null,
